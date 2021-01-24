@@ -9,7 +9,6 @@
         real   , intent(IN)  :: ht(dim), st(dim) 
         real   , intent(OUT) :: rc(dim / 2), ic(dim / 2) 
         integer              :: j
-        real                 :: meanh, means
         real   , allocatable :: datah(:), datas(:)
         if (.not. allocated(datah)) allocate(datah(2 * dim))
         if (.not. allocated(datas)) allocate(datas(2 * dim))
@@ -45,7 +44,6 @@
         real   , intent(OUT) :: pw(dim / 2)
 
         integer              :: j
-        real                 :: mean !sum, var
         real   ,allocatable  :: datah(:)
 
         if (.not. allocated(datah)) allocate(datah(2 * dim))

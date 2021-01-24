@@ -41,11 +41,9 @@
       endif
 
       write(*,*) '------------------------------------------'
-      write(*,*) '   Extraction of the light curve', filename
+      write(*,*) '   Extraction of the light curve', trim(filename)
       write(*,*) 
-      write(*,*) '    Check TIME, RATE, and GTI'
-      write(*,*) 
-      write(*,*) 
+      write(*,*) '   Check TIME, RATE, and GTI'
       
       
 !Let's move in the correct HDU (with the name in hdu_name)      
@@ -64,11 +62,10 @@
 !**************************************************************!      
 ! Let's get the column number for a particolar name with colnum_f (function)
       col_name_temp = '*TIME*'
-      write(*,*) 'Look at the *TIME* column'
+      ! write(*,*) 'Look at the *TIME* column'
       colnum = colnum_f(unit,col_name_temp,status)
       if (colnum .gt. 0.0) then 
-         write(*,*) 'TIME found'
-         write(*,*) 
+         write(*,*) '     TIME column found'
 
 ! Get the datatype of a column and read that column
 !   repeat tells you if there is more than one element in very space of the table  
@@ -101,11 +98,10 @@
      
 !**************************************************************!      
       col_name_temp = '*RATE*'
-      write(*,*) 'Look at the *RATE* column'
+      ! write(*,*) 'Look at the *RATE* column'
       colnum = colnum_f(unit,col_name_temp,status)
       if (colnum .gt. 0.0) then 
-         write(*,*) 'RATE found'
-         write(*,*) 
+         write(*,*) '     RATE column found'
          call ftgtcl(unit,colnum,datacode,repeat,width,status)
          if( status .gt. 0 )call printerror(status)
 
@@ -132,11 +128,10 @@
 
 ! !**************************************************************!      
       col_name_temp = '*ERROR*'
-      write(*,*) 'Look at the *ERROR* column'
+      ! write(*,*) 'Look at the *ERROR* column'
       colnum = colnum_f(unit, col_name_temp, status)
       if (colnum .gt. 0.0) then 
-         write(*,*) 'ERROR found'
-         write(*,*) 
+         write(*,*) '     ERROR column found'
          call ftgtcl(unit, colnum, datacode, repeat, width, status)
          if( status .gt. 0 )call printerror(status)
 
@@ -228,8 +223,7 @@
       col_name_temp = '*START*'
       colnum = colnum_f(unit, col_name_temp, status)
       if (colnum .gt. 0.0) then 
-         write(*,*) 'GTI START found'
-         write(*,*) 
+         write(*,*) '     GTI START found'
          call ftgtcl(unit, colnum, datacode, repeat, width, status)
          if( status .gt. 0 )call printerror(status)
          
@@ -259,8 +253,7 @@
       col_name_temp = '*STOP*'
       colnum = colnum_f(unit, col_name_temp, status)
       if (colnum .gt. 0.0) then 
-         write(*,*) 'GTI STOP found'
-         write(*,*)
+         write(*,*) '     GTI STOP found'
          
          call ftgtcl(unit, colnum, datacode, repeat, width, status)
          if( status .gt. 0 )call printerror(status)
@@ -284,11 +277,10 @@
          write(*,*) '    Check the fits file for exact name of the column '
          stop
       endif
- !**************************************************************!
-
-      write(*,*) '    Extraction ended'
-
+      write(*,*) 
+      write(*,*) '   Extraction ended'
       write(*,*) '------------------------------------------'
+ !**************************************************************!
    
 
 !CONVERSION FROM DOUBLE PRECISION TO REAL OF TIME_D, START

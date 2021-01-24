@@ -187,11 +187,11 @@ program cross
       bias2 = 0.0 
 
 !Coherence and error on the lag with the coherence formula
-      coher2_freq(jj) = (rc_freq_ave(jj)**2 + ic_freq_ave(jj)**2 - bias2) / (pw_freq1_ave(jj) * pw_freq1_ave(jj))
+      coher2_freq(jj) = (rc_freq_ave(jj)**2 + ic_freq_ave(jj)**2 - bias2) / (pw_freq1_ave(jj) * pw_freq2_ave(jj))
 
       err_cohe_lag(jj) = sqrt( (1.0 - coher2_freq(jj)) / (2.0 * coher2_freq(jj) * real(int_number) ) ) / (2 * pi * freq(jj)) 
 
-      ! write(10,*) jj, freq(jj), coher2_freq(jj), rc_freq_ave(jj)**2 + ic_freq_ave(jj)**2, bias2
+      write(10,*) jj, freq(jj), coher2_freq(jj), rc_freq_ave(jj)**2, ic_freq_ave(jj)**2, pw_freq1_ave(jj),  pw_freq2_ave(jj)
 
 !Adam's formula real and imaginary part
          ! errA_rc_ic(jj) = sqrt (pw_freq_ave2(jj) * (pw_freq_ave1(jj, k) - ( (rc_freq_ave(jj)**2 + ic_freq_ave(jj)**2 - bias2) / (pw_freq_ave2(jj, k) - P_noise_ext_ref(k)) ) ) / (2 * real( int_number) ) )

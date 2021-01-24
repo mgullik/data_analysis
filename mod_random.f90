@@ -1,37 +1,3 @@
-MODULE dyn_lc
-!------------------------------------------------------------------
-!  Module containing definitions needed to dynamically allocate 
-!  the values of an array 
-!-----------------------------------------------------------------
-! int_len_dim: length of the interval (in units of element) -> this is decided by the user (must be a power of 2)
-! int_number: number of interval in the light curve -> this is calculated automatically
-  implicit none 
-  integer     :: dim_lc, dim_GTI, int_number = -1
-  integer     :: int_len_dim, gap = -1, check_gap_num = -1, en_num
-  real                 :: dt = -1
-  logical              :: check_power2
-
-  real   , allocatable :: lc(:), time(:), err_rate(:), bkg(:)
-  real   , allocatable :: start_GTI(:), end_GTI(:)
-
-!split lc variables   
-  real   , allocatable :: lc_int(:,:), time_int(:,:), bkg_int(:,:)
-
-  real                 :: df
-  real   , allocatable :: freq(:)
-  
-!lag vs freq variables
-  real                 :: ave_rate_freq1, ave_rate_freq2
-  real   , allocatable :: lc_freq1(:,:), lc_freq2(:,:)
-  ! real   , allocatable :: pw_freq1_ave(:), pw_freq2_ave(:), &
-  !                         pw2_freq1_ave(:), pw2_freq2_ave(:)
-  real   , allocatable :: lc_en(:,:,:), bkg_en(:,:,:)
-  ! real   , allocatable :: time_int_o(:,:,:), lc_en_o(:,:,:,:), bkg_en_o(:,:,:,:)
-  integer, allocatable :: split_ind(:), int_len_dim_o(:)
-END MODULE dyn_lc
-!------------------------------------------------------------------
-
-!------------------------------------------------------------------
 !------------------------------------------------------------------
 module rand_fun
 
@@ -49,7 +15,6 @@ module rand_fun
       idum = seed
     end subroutine set_seed
 
-!------------------------------------------------------------------
    function poidev(xm)
      implicit none
      real poidev, xm, pi
@@ -85,10 +50,9 @@ module rand_fun
       poidev = em
       return
     end function poidev
-!-----------------------------------------------------------------
 
-!------------------------------------------------------------------
-      FUNCTION gammln(xx)
+    
+    FUNCTION gammln(xx)
         implicit none 
         REAL gammln, xx
         INTEGER j
@@ -108,9 +72,7 @@ module rand_fun
            gammln = real(tmp + log(stp * ser / x))
            return
         END function gammln
-!-----------------------------------------------------------------
 
-!------------------------------------------------------------------
         FUNCTION ran1()
           implicit none 
           INTEGER IA,IM,IQ,IR,NTAB,NDIV
@@ -139,7 +101,6 @@ module rand_fun
              ran1=min(AM*iy,RNMX)
              return
           END function ran1
-!----------------------------------------------------------------
 
   end module rand_fun
 !----------------------------------------------------------------

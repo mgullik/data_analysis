@@ -3,10 +3,10 @@
       use dyn_lc
       implicit none
 
-      integer               :: i, new_dim_GTI
+      integer               :: i!, new_dim_GTI
       real                  :: tot_time_lc
-      logical               :: yes_no, power2, check_interval, check 
-      real   , allocatable  :: temp_array(:), temp_GTI1(:), temp_GTI2(:)
+      logical               :: power2, check_interval, check !, yes_no 
+      ! real   , allocatable  :: temp_array(:), temp_GTI1(:), temp_GTI2(:)
 
 ! The first time (when int_number is -1 and split_ind is not allocated) we call the lc_split_first to work out split_index array
 ! Then we call only lc_split_index
@@ -106,14 +106,13 @@
          do i = 1, dim_GTI
             tot_time_lc = tot_time_lc +  end_GTI(i) - start_GTI(i)
          enddo
-         write(*,*) '   Length of the light curve, summing all the pieces', tot_time_lc, '(sec)'
+         write(*,'(A, F8.1, A)') '   Total exposure time of the light curve', tot_time_lc, ' s'
          write(*,*)
-
 
          do 
 ! !length of the intervals
-            write(*,*) '   Length of the interval in steps: '
-            write(*,*) '      Remember the dt is ', dt
+            write(*,*) '   Enter the length of the interval in steps: '
+            write(*,'(A, F6.4, A)') '      !! Remember that dt is ', dt, ' s'
             read(*,*) int_len_dim
             write(*,*)
             
@@ -205,7 +204,7 @@
     integer, intent(OUT)   :: new_dim_GTI
 
     integer                :: j, i, k, w, ee,  max_gap
-    real                   :: m, q, lc_interpol, m_b, q_b, bkg_interpol, max_gap_sec 
+    real                   :: m, q, lc_interpol, m_b, max_gap_sec!, q_b, bkg_interpol
     real   , allocatable   :: new_start_GTI(:), new_end_GTI(:)
 
     ! do j = 1, dim_GTI
@@ -260,7 +259,7 @@
           if (allocated(bkg)) then
              write(*,*) 'bkg active'
              m_b = (bkg(ee + i) - bkg(i - 1)) / (time(ee + i) - time(i - 1))
-             q_b = bkg(i - 1) - m_b * time(i - 1)
+             ! q_b = bkg(i - 1) - m_b * time(i - 1)
           endif
           
           do k = i, i + ee - 1
@@ -268,21 +267,21 @@
              lc_interpol = lc_interpol * dt
              ! write(*,*) 'time interpol', time(k), lc_interpol
              
-             if (allocated(bkg)) then 
-                bkg_interpol  = m_b * time(k) + q_b
-                bkg_interpol = bkg_interpol * dt
-             endif
+             ! if (allocated(bkg)) then 
+             !    bkg_interpol  = m_b * time(k) + q_b
+             !    bkg_interpol = bkg_interpol * dt
+             ! endif
 !Extracting the interpolation value from a Poisson distribution with the same mean
              lc(k) = poidev(lc_interpol) / dt
-             ! write(*,*) 'extract!', lc(k)
-             ! if (lc(k) .lt. 0.0) lc(k) = 0.0
+             ! ! write(*,*) 'extract!', lc(k)
+             ! ! if (lc(k) .lt. 0.0) lc(k) = 0.0
 
-             ! lc(k) = m * time(k) + q
-             if (allocated(bkg)) then  
-                bkg(k)  = poidev(bkg_interpol) / dt
-             endif 
-             ! write(*,*) 'bkg', bkg(k)
-             ! if (bkg(k) .lt. 0.0) bkg(k) = 0.0
+             ! ! lc(k) = m * time(k) + q
+             ! if (allocated(bkg)) then  
+             !    bkg(k)  = poidev(bkg_interpol) / dt
+             ! endif 
+             ! ! write(*,*) 'bkg', bkg(k)
+             ! ! if (bkg(k) .lt. 0.0) bkg(k) = 0.0
              
           enddo
           new_end_GTI(w) = end_GTI(j+1)
