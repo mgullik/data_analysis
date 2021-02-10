@@ -3,7 +3,7 @@ subroutine load_lc_lag_ene()
   implicit none
 
   integer              :: i, j, k
-  real                 :: en_units
+  double precision     :: en_units
   character (len = 500)  :: name_path,  name_base, filename, &
        filename_en_bin, name_extension, filename_ref
   logical              :: yes_no
@@ -47,13 +47,12 @@ subroutine load_lc_lag_ene()
       close(55)
       print *, '   Number of energies in the spectrum: ', en_num
       print *, ' '
-      print *, '   Energy boundaries in keV: ', (l_en_bin(1) + r_en_bin(1)) * 0.5 ,' - ', (l_en_bin(en_num) + r_en_bin(en_num)) * 0.5  
+      write(*, '(A, F6.3, A, F6.3)') '   Energy boundaries in keV: ', (l_en_bin(1) + r_en_bin(1)) * 0.5d0 ,' - ', (l_en_bin(en_num) + r_en_bin(en_num)) * 0.5d0  
       print *, ' '
 
       if (.not. allocated(ave_rate_en) ) allocate(ave_rate_en(en_num))
       ! if (.not. allocated(ave_bkg_en)  ) allocate(ave_bkg_en (en_num))
-      ave_rate_en = 0.0
-      ! ave_bkg_en  = 0.0
+      ave_rate_en = 0.d0
 
 !GET ALL THE LIGHT CURVES  
 
@@ -67,6 +66,7 @@ subroutine load_lc_lag_ene()
          write(filename, '(A, I0, A, I0, A)') trim(name_base), l_bin(k), 'eV-', r_bin(k), trim(name_extension)
          write(*,*)
          call extract_lc(filename)
+
          if (allocated(lc)) then 
             call split_lc()
          else
@@ -108,7 +108,7 @@ subroutine load_lc_lag_ene()
          call split_lc()
 
          if(.not. allocated(lc_ref)) allocate(lc_ref(int_number, int_len_dim))
-         ave_rate_ref = 0.0
+         ave_rate_ref = 0.d0
          do j = 1, int_len_dim
             do i = 1, int_number
                lc_ref(i, j) = lc_int(i, j)

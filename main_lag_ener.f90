@@ -5,27 +5,27 @@ program cross
   use rand_fun
   implicit none 
 
-  real   , parameter   :: pi = acos(-1.0)
+  double precision, parameter   :: pi = acos(-1.0)
   integer              :: i, j, k, kk, jj
   integer, allocatable :: num_freq_bins(:)
-  real   , allocatable :: rc_en(:,:,:), ic_en(:,:,:), &
+  double precision , allocatable :: rc_en(:,:,:), ic_en(:,:,:), &
                           pw_en(:,:,:), pw_ref_en(:,:,:), &
                           lc_ref_cross(:,:,:)
 
-  real   , allocatable :: rc_avefq_en(:,:), ic_avefq_en(:,:), &
+  double precision , allocatable :: rc_avefq_en(:,:),ic_avefq_en(:,:),&
                           rc2_avefq_en(:,:), ic2_avefq_en(:,:), &
                           rc_ic_avefq_en(:,:), pw_avefq_en(:,:), &
                           pw_avefq_en_ref(:,:)
-  real   , allocatable :: var_rc(:,:), var_ic(:,:), deriv_rc(:,:), &
+  double precision , allocatable :: var_rc(:,:), var_ic(:,:), deriv_rc(:,:), &
                           deriv_ic(:,:), covariance(:,:), &
                           err_std_rc(:,:), err_std_ic(:,:), &
                           coher2_en(:,:), err_Aform_rc_ic(:,:), &
                           err_Aform_lag(:,:), err_prop_lag(:,:), &
                           err_cohe_lag(:,:), lag_en(:,:)
 !P_noise
-  real                 :: freq_limit, bias2
-  real                 :: get_p_noise_pw  !function
-  real   , allocatable :: P_noise_ext(:), P_noise_ext_ref(:), &
+  double precision               :: freq_limit, bias2
+  double precision               :: get_p_noise_pw  !function
+  double precision , allocatable :: P_noise_ext(:), P_noise_ext_ref(:), &
                           pw_aveint(:), pw_aveint_ref(:)
 
   
@@ -46,7 +46,7 @@ program cross
 
 
       if (.not. allocated(lc_ref_cross)) allocate(lc_ref_cross(int_number, int_len_dim, en_num))
-      lc_ref_cross = 0.0
+      lc_ref_cross = 0.d0
       
 !Calculate the reference band for every light curve 
       if (.not. allocated(lc_ref)) then          
@@ -84,13 +84,13 @@ program cross
                   ! call periodogram(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
                   ! call periodogram(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
                   
-                  call ncperiodogram_frac_rms(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
-                  call periodogram_frac_rms(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
-                  call periodogram_frac_rms(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
+                  ! call ncperiodogram_frac_rms(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
+                  ! call periodogram_frac_rms(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
+                  ! call periodogram_frac_rms(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
 
-                  ! call ncperiodogram_no_norm(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
-                  ! call periodogram_no_norm(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
-                  ! call periodogram_no_norm(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
+                  call ncperiodogram_no_norm(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
+                  call periodogram_no_norm(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
+                  call periodogram_no_norm(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
                   
                ! write(*,*) 'FFT done', i
             else
@@ -135,8 +135,8 @@ program cross
       ! write(*,'(A,F5.1)') '   Calculating the Poisson noise for every energy PDS. Above frequency  ', freq_limit
       ! write(*,*)
       do k = 1, en_num
-         pw_aveint     = 0.0
-         pw_aveint_ref = 0.0
+         pw_aveint     = 0.d0
+         pw_aveint_ref = 0.d0
          do i = 1, int_number
             do j = 1, int_len_dim
                ! write(*,*) 'ciao 123 ', pw_en(i, j, k), pw_ref_en(i, j, k)
@@ -154,8 +154,8 @@ program cross
       deallocate(pw_aveint    )
       deallocate(pw_aveint_ref)
       write(*,*)
-      P_noise_ext     = 0.0
-      P_noise_ext_ref = 0.0         
+      P_noise_ext     = 0.d0
+      P_noise_ext_ref = 0.d0         
 
       call make_freq_intervals()
 
@@ -166,13 +166,13 @@ program cross
       if(.not. allocated(rc_ic_avefq_en )) allocate(rc_ic_avefq_en (freq_num, en_num))
       if(.not. allocated(pw_avefq_en    )) allocate(pw_avefq_en    (freq_num, en_num))
       if(.not. allocated(pw_avefq_en_ref)) allocate(pw_avefq_en_ref(freq_num, en_num))
-      rc_avefq_en     = 0.0
-      ic_avefq_en     = 0.0
-      rc2_avefq_en    = 0.0
-      ic2_avefq_en    = 0.0
-      rc_ic_avefq_en  = 0.0
-      pw_avefq_en     = 0.0 
-      pw_avefq_en_ref = 0.0
+      rc_avefq_en     = 0.d0
+      ic_avefq_en     = 0.d0
+      rc2_avefq_en    = 0.d0
+      ic2_avefq_en    = 0.d0
+      rc_ic_avefq_en  = 0.d0
+      pw_avefq_en     = 0.d0 
+      pw_avefq_en_ref = 0.d0
 
       do k = 1, en_num 
          do jj = 1, freq_num
@@ -236,30 +236,30 @@ program cross
 
       covariance(jj, k) = rc_ic_avefq_en(jj, k) - (rc_avefq_en(jj, k) * ic_avefq_en(jj, k))
 
-      deriv_rc(jj, k) =  (-1. *  ic_avefq_en(jj, k) / rc_avefq_en(jj, k)**2) / (1 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
-      deriv_ic(jj, k) =                      (1. / rc_avefq_en(jj, k))    / (1 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
+      deriv_rc(jj, k) =  (-1.d0 *  ic_avefq_en(jj, k) / rc_avefq_en(jj, k)**2) / (1.d0 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
+      deriv_ic(jj, k) =                        (1.d0  / rc_avefq_en(jj, k))    / (1.d0 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
 
 !bias term
       if ((num_freq_bins(jj) * int_number) .gt. 500 ) then 
          bias2 = ((pw_avefq_en(jj, k) - P_noise_ext(k)) * P_noise_ext_ref(k) + (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) * P_noise_ext(k) + P_noise_ext(k) * P_noise_ext_ref(k) ) / (real(num_freq_bins(jj) * int_number))
       else
-         bias2 = 0.0 
+         bias2 = 0.d0 
       endif
 
-      ! bias2 = 0.0 
+      ! bias2 = 0.d0 
 
 !Adam's formula real and imaginary part
-      err_Aform_rc_ic(jj, k) = sqrt (pw_avefq_en_ref(jj, k) * (pw_avefq_en(jj, k) - ( (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) ) ) / (2 * real(num_freq_bins(jj) * int_number) ) )
+      err_Aform_rc_ic(jj, k) = sqrt (pw_avefq_en_ref(jj, k) * (pw_avefq_en(jj, k) - ( (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) ) ) / (2.d0 * real(num_freq_bins(jj) * int_number) ) )
 
 ! Standat error on the real and imaginary part 
       err_std_rc(jj, k) = sqrt(var_rc(jj, k) / real(num_freq_bins(jj) * int_number))
       err_std_ic(jj, k) = sqrt(var_ic(jj, k) / real(num_freq_bins(jj) * int_number))
       
 !lag calculation 
-      lag_en(jj, k) = atan2(ic_avefq_en(jj, k), rc_avefq_en(jj, k)) / (2 * pi * relevant_freq(jj))
+      lag_en(jj, k) = atan2(ic_avefq_en(jj, k), rc_avefq_en(jj, k)) / (2.d0 * pi * relevant_freq(jj))
 
 !error lag with propagation formula
-      err_prop_lag(jj, k) = sqrt( (deriv_rc(jj, k)**2 * var_rc(jj, k) + deriv_ic(jj, k)**2 * var_ic(jj, k) + 2. * deriv_rc(jj, k) * deriv_ic(jj, k) * covariance(jj, k)) / real(num_freq_bins(jj) * int_number) ) / (2 * pi * relevant_freq(jj))
+      err_prop_lag(jj, k) = sqrt( (deriv_rc(jj, k)**2 * var_rc(jj, k) + deriv_ic(jj, k)**2 * var_ic(jj, k) + 2.d0 * deriv_rc(jj, k) * deriv_ic(jj, k) * covariance(jj, k)) / real(num_freq_bins(jj) * int_number) ) / (2.d0 * pi * relevant_freq(jj))
 
 !coherence calculations      
       coher2_en(jj, k) = (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en(jj, k) * pw_avefq_en_ref(jj, k))
@@ -268,7 +268,7 @@ program cross
          err_cohe_lag(jj, k) = sqrt( (1.0 - coher2_en(jj, k)) / (2.0 * coher2_en(jj, k) * real(num_freq_bins(jj) * int_number) ) ) / (2 * pi * relevant_freq(jj)) 
 
 !Adam's formula lag
-         err_Aform_lag(jj, k) = sqrt( pw_avefq_en_ref(jj, k) * ( (pw_avefq_en(jj, k) / (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) ) - ( 1 / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k))  ) ) / (2 *  real(num_freq_bins(jj) * int_number)) ) / (2 * pi * relevant_freq(jj)) 
+         err_Aform_lag(jj, k) = sqrt( pw_avefq_en_ref(jj, k) * ( (pw_avefq_en(jj, k) / (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) ) - ( 1.d0 / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k))  ) ) / (2 *  real(num_freq_bins(jj) * int_number)) ) / (2.d0 * pi * relevant_freq(jj)) 
 
 
          write(*,*) '          k,          jj,    relevant freq,    coherence,       cross^2,              bias^2,            num_freq_average ' 

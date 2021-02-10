@@ -4,7 +4,7 @@
       implicit none
 
       integer               :: i!, new_dim_GTI
-      real                  :: tot_time_lc
+      double precision      :: tot_time_lc
       logical               :: power2, check_interval, check !, yes_no 
       ! real   , allocatable  :: temp_array(:), temp_GTI1(:), temp_GTI2(:)
 
@@ -32,7 +32,7 @@
          do i = 2 , dim_lc
 !         write(*,*) 'time index', i
             ! write(*,*) time(i) - time(i - 1)
-            if ((time(i) - time(i - 1)) .gt. 10 * dt  ) then
+            if ((time(i) - time(i - 1)) .gt. 10.d0 * dt  ) then
                check = .false.
             endif
          enddo
@@ -102,7 +102,7 @@
       endif
          
          write(*,*)
-         tot_time_lc = 0.0
+         tot_time_lc = 0.d0
          do i = 1, dim_GTI
             tot_time_lc = tot_time_lc +  end_GTI(i) - start_GTI(i)
          enddo
@@ -123,8 +123,6 @@
                write(*,*)
                if(.not. allocated(lc_int)  ) allocate(lc_int  (int_number, int_len_dim) )
                if(.not. allocated(time_int)) allocate(time_int(int_number, int_len_dim) )
-               if(.not. allocated(bkg_int) ) allocate(bkg_int (int_number, int_len_dim) )
-            ! if(.not. allocated(err_int) ) allocate(err_int (int_number, int_len_dim) )
 
                
             !Fill the time_int, lc_int and bkg_int which are the light curves separated in intervals
@@ -204,8 +202,8 @@
     integer, intent(OUT)   :: new_dim_GTI
 
     integer                :: j, i, k, w, ee,  max_gap
-    real                   :: m, q, lc_interpol, m_b, max_gap_sec!, q_b, bkg_interpol
-    real   , allocatable   :: new_start_GTI(:), new_end_GTI(:)
+    double precision       :: m, q, lc_interpol, m_b, max_gap_sec!, q_b, bkg_interpol
+    double precision, allocatable   :: new_start_GTI(:), new_end_GTI(:)
 
     ! do j = 1, dim_GTI
     !    write(*,*) start_GTI(j), end_GTI(j)
@@ -331,17 +329,17 @@
       split_ind(1) = 1
       
 !First step
-      ! write(*,*) 'First time of the light curve ', time(1)
-      ! write(*,*) 'First time of the first GTI', start_GTI(1)
+      write(*,*) 'First time of the light curve ', time(1)
+      write(*,*) 'First time of the first GTI', start_GTI(1)
       if( (time(1) .ge. start_GTI(1))  .and. (time(1) .le. end_GTI(1)) ) then
          count = count + 1
       endif
 
       
       do i = 2 , dim_lc
-!         write(*,*) 'time index', i
+         ! write(*,*) 'time index', i
          check = .false.
-         if ((time(i) - time(i - 1)) .gt. 2 * dt  ) then
+         if ((time(i) - time(i - 1)) .gt. 2.d0 * dt  ) then
             ! write(*,*) 'jump in time of the light curve'
             ! write(*,*) 'from ', time(i - 1), 'to ', time(i)
             count = 0
@@ -349,7 +347,7 @@
          else 
             
             do j = 1, dim_GTI
-            ! write(*,*) time(i), start_GTI(j), end_GTI(j) 
+               ! write(*,*) time(i), start_GTI(j), end_GTI(j) 
                if( (time(i) .ge. start_GTI(j))  .and. (time(i) .le. end_GTI(j)) ) then
                   check = .true.
                   ! write(*,*) 'exit', check
@@ -401,7 +399,7 @@
         do j = split_ind(2 * i - 1), split_ind(2 * i)
            lc_int  (i, count) = lc(j)
            time_int(i, count) = time(j)
-           if(allocated(bkg)) bkg_int (i, count) = bkg(j)
+           ! if(allocated(bkg)) bkg_int (i, count) = bkg(j)
            ! if (lc(j) .lt. 0.0) lc(j) = 0.0
            ! if (bkg(j) .lt. 0.0) bkg(j) = 0.0
 

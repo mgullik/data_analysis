@@ -13,9 +13,9 @@
                              ,nrow, nrow_GTI, ncol, ncol_GTI, colnum & 
                              ,felem, nelem, datacode, repeat, width, frow
       integer             :: colnum_f
-      real                :: dt_f, dt_temp
+      double precision    :: dt_f, dt_temp
       real                :: nullval
-      double precision    :: first_time_bin
+      double precision    :: first_time_bin, first_time_bin_GTI 
 
       real  , dimension(:), allocatable :: time_e, rate_e, bkg_e, start_GTI_e, end_GTI_e, err_rate_e
       double precision, dimension(:), allocatable :: time_d, rate_d, bkg_d, start_GTI_d, end_GTI_d, err_rate_d
@@ -80,9 +80,11 @@
          felem = 1 ! first pixel of the element vector (ignored for ASCII tables)
          nullval = -1
          if(datacode .eq. 42) then
+            write(*,*) '     real type'
             if(.not.allocated(time_e)) allocate(time_e(nrow))
             call ftgcve(unit,colnum,frow,felem,nelem,nullval,time_e,anynul,status)         
          else if (datacode .eq. 82) then
+            write(*,*) '     double type'
             if(.not.allocated(time_d)) allocate(time_d(nrow))
             call ftgcvd(unit,colnum,frow,felem,nelem,nullval,time_d,anynul,status)
          else
@@ -110,9 +112,11 @@
          felem = 1 ! first pixel of the element vector (ignored for ASCII tables)
          nullval = -1
          if(datacode .eq. 42) then
+            write(*,*) '     real type'
             if(.not.allocated(rate_e)) allocate(rate_e(nrow))
             call ftgcve(unit,colnum,frow,felem,nelem,nullval,rate_e,anynul,status)         
          else if (datacode .eq. 82) then
+            write(*,*) '     double type'
             if(.not.allocated(rate_d)) allocate(rate_d(nrow))
             call ftgcvd(unit,colnum,frow,felem,nelem,nullval,rate_d,anynul,status)         
          else
@@ -140,9 +144,11 @@
          felem   = 1    ! first pixel of the element vector (ignored for ASCII tables)
          nullval = -1
          if(datacode .eq. 42) then
+            write(*,*) '     real type'
             if(.not.allocated(err_rate_e)) allocate(err_rate_e(nrow))
             call ftgcve(unit, colnum, frow, felem, nelem, nullval, err_rate_e, anynul, status)
          else if (datacode .eq. 82) then
+            write(*,*) '     double type'
             if(.not.allocated(err_rate_d)) allocate(err_rate_d(nrow))
             call ftgcvd(unit, colnum, frow, felem, nelem, nullval, err_rate_d, anynul, status) 
          else
@@ -232,9 +238,11 @@
          felem   = 1 ! first pixel of the element vector (ignored for ASCII tables)
          nullval = -1
          if(datacode .eq. 42) then
+            write(*,*) '     real type'
             if(.not.allocated(start_GTI_e)) allocate(start_GTI_e(nrow_GTI))
             call ftgcve(unit, colnum, frow, felem, nelem, nullval, start_GTI_e, anynul, status)         
          else if (datacode .eq. 82) then
+            write(*,*) '     double type'
             if(.not.allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
             call ftgcvd(unit, colnum, frow, felem, nelem, nullval, start_GTI_d, anynul, status)         
          else
@@ -263,9 +271,11 @@
          felem   = 1        ! first pixel of the element vector (ignored for ASCII tables)
          nullval = -1
          if(datacode .eq. 42) then
+            write(*,*) '     real type'
             if(.not.allocated(end_GTI_e)) allocate(end_GTI_e(nrow_GTI))
             call ftgcve(unit, colnum, frow, felem, nelem, nullval, end_GTI_e, anynul, status)         
          else if (datacode .eq. 82) then
+            write(*,*) '     double type'
             if(.not.allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
             call ftgcvd(unit, colnum, frow, felem, nelem, nullval, end_GTI_d, anynul, status)         
          else
@@ -283,72 +293,85 @@
  !**************************************************************!
    
 
-!CONVERSION FROM DOUBLE PRECISION TO REAL OF TIME_D, START
-      first_time_bin = time_d(1)
-      if (allocated(time_d)) then
-         if(.not. allocated(time_e)) allocate(time_e(nrow))
+!CONVERSION FROM REAL TO DOUBLE PRECISION OF TIME
+      if (allocated(time_e)) then
+         if(.not. allocated(time_d)) allocate(time_d(nrow))
+         first_time_bin = dble(time_e(1)) 
          do i = 1, nrow
-            time_e(i) = real(time_d(i) - first_time_bin)
+            time_d(i) = dble(time_e(i)) - first_time_bin
          enddo
-         deallocate(time_d)
+         deallocate(time_e)
+      else
+         first_time_bin = time_d(1)
+         do i = 1, nrow
+            time_d(i) = time_d(i) - first_time_bin
+         enddo         
       endif
 
-!CONVERSION FROM DOUBLE PRECISION TO REAL OF RATE_D, START
-      if (allocated(rate_d)) then
-         if(.not. allocated(rate_e)) allocate(rate_e(nrow))
+!CONVERSION FROM REAL TO DOUBLE PRECISION OF RATE_E
+      if (allocated(rate_e)) then
+         if(.not. allocated(rate_d)) allocate(rate_d(nrow))
          do i = 1, nrow
-            rate_e(i) = real(rate_d(i))
+            rate_d(i) = dble(rate_e(i))
          enddo
-         deallocate(rate_d)
+         deallocate(rate_e)
       endif
 
-!CONVERSION FROM DOUBLE PRECISION TO REAL OF BKG_D, START
-      if (allocated(bkg_d)) then
-         if(.not. allocated(bkg_e)) allocate(bkg_e(nrow))
+      if (allocated(err_rate_e)) then
+         if(.not. allocated(err_rate_d)) allocate(err_rate_d(nrow))
          do i = 1, nrow
-            bkg_e(i) = real(bkg_d(i))
+            err_rate_d(i) = dble(err_rate_e(i))
          enddo
-         deallocate(bkg_d)
+         deallocate(err_rate_e)
       endif
 
-
-      first_time_bin = start_GTI_d(1) 
          
-      if (allocated(start_GTI_d)) then
-         if(.not. allocated(start_GTI_e)) allocate(start_GTI_e(nrow_GTI))
+      if (allocated(start_GTI_e)) then
+         if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+         first_time_bin_GTI = dble(start_GTI_e(1)) 
          do i = 1, nrow_GTI
-            start_GTI_e(i) = real(start_GTI_d(i) - first_time_bin)
+            start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
          enddo
-         deallocate(start_GTI_d)
+         deallocate(start_GTI_e)
+      else
+         first_time_bin_GTI = start_GTI_d(1) 
+         do i = 1, nrow_GTI
+            start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
+         enddo
+         
       endif
 
-       if (allocated(end_GTI_d)) then
-         if(.not. allocated(end_GTI_e)) allocate(end_GTI_e(nrow_GTI))
+       if (allocated(end_GTI_e)) then
+         if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
          do i = 1, nrow_GTI
-            end_GTI_e(i) = real(end_GTI_d(i) - first_time_bin)
+            end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
          enddo
-         deallocate(end_GTI_d)
+         deallocate(end_GTI_e)
+      else
+         do i = 1, nrow_GTI
+            end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
+         enddo
       endif
 
 !HERE it is possible to print the GTI and the gaps
       ! write(*,*) '-----------------------------------------'
       ! write(*,*) 'GTI: ', nrow_GTI
       ! do i = 1, nrow_GTI - 1
-      !    write(*,*) start_GTI_e(i), end_GTI_e(i)
-      !    write(*,*) 'ok time ',  end_GTI_e(i) -  start_GTI_e(i)
-      !    write(*,*) 'gap ', start_GTI_e(i + 1) - end_GTI_e(i)
+      !    write(*,*) start_GTI_d(i), end_GTI_d(i)
+      !    write(*,*) 'ok time ',  end_GTI_d(i) -  start_GTI_d(i)
+      !    write(*,*) 'gap ', start_GTI_d(i + 1) - end_GTI_d(i)
       ! enddo
-      ! write(*,*) start_GTI_e(nrow_GTI), end_GTI_e(nrow_GTI)
+      ! write(*,*) start_GTI_d(nrow_GTI), end_GTI_d(nrow_GTI)
       ! write(*,*) '-----------------------------------------'
 
-!HERE it is possible to print the light curve before we fill the gaps
+!HERE it is possible to print the light curve 
 
       ! do i=1, nrow
-      !    write(99,*) time_e(i),rate_e(i)
+      !    write(99,*) time_d(i), rate_d(i)
       ! enddo
 
       ! do i=1, nrow_GTI
-      !    write(80,*) start_GTI_e(i),end_GTI_e(i)
+      !    write(98,*) start_GTI_d(i),end_GTI_d(i)
       ! enddo
 
 
@@ -373,51 +396,18 @@
 !Set the dimension of the lc and write the lc, time, and bkg in the common arrays
       dim_lc = nrow
       
-      ! do i = 1, nrow
-      !    lc(i)   = rate_e(i) 
-      !    time(i) = time_e(i)
-      !    bkg(i)  = bkg_e(i)
-      ! enddo
+      do i = 1, nrow
+         time(i) = time_d(i)
+      enddo
 
-      if (allocated(rate_e)) then 
-         do i = 1, nrow
-            lc(i)   = rate_e(i)
-         enddo
-      else
-         deallocate(lc)
-         write(*,*) '!! ATTENTION !! No RATE column'
-         stop
-      endif
+      do i = 1, nrow
+         lc(i)   = rate_d(i)
+      enddo
 
-      if (allocated(time_e)) then 
-         do i = 1, nrow
-            time(i) = time_e(i)
-         enddo
-      else 
-         deallocate(time)
-         write(*,*) '!! ATTENTION !! No TIME column'
-         stop
-      endif
+      do i = 1, nrow
+         err_rate(i)  = err_rate_d(i)
+      enddo
 
-      if (allocated(err_rate_e)) then 
-         do i = 1, nrow
-            err_rate(i)  = err_rate_e(i)
-         enddo
-      else 
-         deallocate(err_rate)
-         write(*,*) '!! ATTENTION !! No ERROR column'
-         write(*,*)
-      endif
-
-      if (allocated(bkg_e)) then 
-         do i = 1, nrow
-            bkg(i)  = bkg_e(i)
-         enddo
-      else 
-         deallocate(bkg)
-         write(*,*) '!! ATTENTION !! No BKG column'
-         write(*,*)
-      endif
       
 !Fill the GTI 
 !It is complicated because we have to distinguish between the first call and the others
@@ -429,8 +419,9 @@
          dim_GTI = nrow_GTI
 !Fill the actual GTI         
          do i = 1, dim_GTI
-            start_GTI(i) = start_GTI_e(i)
-            end_GTI  (i) = end_GTI_e(i)
+            start_GTI(i) = start_GTI_d(i)
+            end_GTI  (i) = end_GTI_d(i)
+            ! write(*,*) 'GTI', start_GTI_d(i), end_GTI_d(i)
          enddo
       else 
          if (check_gap_num .ne. nrow_GTI) then 
@@ -445,8 +436,8 @@
             allocate(end_GTI(nrow_GTI))
             dim_GTI = nrow_GTI
          do i = 1, dim_GTI
-            start_GTI(i) = start_GTI_e(i)
-            end_GTI  (i) = end_GTI_e(i)
+            start_GTI(i) = start_GTI_d(i)
+            end_GTI  (i) = end_GTI_d(i)
          enddo
          endif
       endif
@@ -461,8 +452,12 @@
       if(allocated(rate_e)) deallocate(rate_e)
       if(allocated(rate_d)) deallocate(rate_d)
       if(allocated(bkg_e) ) deallocate(bkg_e )
+      if(allocated(bkg_d) ) deallocate(bkg_d )
+      if(allocated(err_rate_d) ) deallocate(err_rate_d )
       if(allocated(err_rate_e) ) deallocate(err_rate_e )
       
+      if(allocated(start_GTI_d)) deallocate(start_GTI_d)
+      if(allocated(end_GTI_d)) deallocate(end_GTI_d)
       if(allocated(start_GTI_e)) deallocate(start_GTI_e)
       if(allocated(end_GTI_e)) deallocate(end_GTI_e)
 

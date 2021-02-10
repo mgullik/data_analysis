@@ -4,7 +4,7 @@ subroutine make_freq_array()
   integer :: j
 
 ! !Frequency array
-    df = 0.5 / (dt * int_len_dim)
+    df = 0.5d0 / (dt * int_len_dim)
     if (.not. allocated(freq)) allocate(freq(int_len_dim / 2))
     ! print *, dt, int_len_dim
 

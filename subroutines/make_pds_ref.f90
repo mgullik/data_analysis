@@ -4,7 +4,7 @@ subroutine make_PDS_ref()
   implicit none
 
   integer              :: i, j, reb_dim
-  real   , allocatable :: pw_ref_int(:,:), pw2_ref(:)
+  double precision, allocatable :: pw_ref_int(:,:), pw2_ref(:)
   ! real   , allocatable :: reb_freq(:), reb_pds_ref(:), reb_err_pds_ref(:)
   character (len = 200):: name_base_2
   logical              :: yes_no

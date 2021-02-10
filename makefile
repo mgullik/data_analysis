@@ -38,7 +38,7 @@ old:
 	$(comp) $(main_old) $(incs) $(libs) -o old_lag_freq
 
 clean:
-	rm -f *.o *~ subroutines/*~ 
+	rm -f *.o *~ subroutines/*~ ener freq
 
 clean_products:
 	rm -f *.o *~ subroutines/*~ lag_freq_err_prop.dat lag_freq_err_cohe.dat cross_spec_imaginary_vs_freq.dat cross_spec_real_vs_freq.dat freq ener old_freq

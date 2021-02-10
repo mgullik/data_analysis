@@ -3,8 +3,8 @@ subroutine make_freq_intervals()
   implicit none
 
   integer              :: jj
-  real                 :: min_freq, max_freq
-  real   , allocatable :: fq_min_arr(:), fq_max_arr(:), fq(:)
+  double precision     :: min_freq, max_freq
+  double precision , allocatable :: fq_min_arr(:), fq_max_arr(:), fq(:)
   character (len=200)  :: filename 
 
   filename = 'ener_freq_info.txt'
@@ -66,7 +66,7 @@ subroutine make_freq_intervals()
    if (.not. allocated(relevant_freq)) allocate(relevant_freq(freq_num))
 
    do jj = 1, freq_num       
-      relevant_freq(jj) = (fq_max_arr(jj) + fq_min_arr(jj)) * 0.5 
+      relevant_freq(jj) = (fq_max_arr(jj) + fq_min_arr(jj)) * 0.5d0 
    enddo
 
    write(*,*) '   Frequnecy intervals have been calculated'

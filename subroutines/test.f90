@@ -37,7 +37,7 @@ subroutine test_print_lcs()
   implicit none
 
   integer :: i, j
-  real    :: mean_lc1, mean_lc2
+  double precision    :: mean_lc1, mean_lc2
   character (len=200) :: filename1, filename2 
   
 

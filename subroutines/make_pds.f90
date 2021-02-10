@@ -3,11 +3,11 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
   implicit none
 
   integer, intent(IN)  :: int_number, int_len_dim
-  real   , intent(IN)  :: lc_int(int_number, int_len_dim), freq(int_len_dim /2)
-  real   , intent(OUT) :: pds(int_len_dim /2), err_pds(int_len_dim /2)
+  double precision, intent(IN)  :: lc_int(int_number, int_len_dim), freq(int_len_dim /2)
+  double precision, intent(OUT) :: pds(int_len_dim /2), err_pds(int_len_dim /2)
 
   integer              :: i, j, reb_dim
-  real   , allocatable :: pds_int(:,:), pds2(:)
+  double precision, allocatable :: pds_int(:,:), pds2(:)
   character (len = 200):: name_base_2
   logical              :: yes_no
   

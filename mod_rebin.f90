@@ -1,19 +1,19 @@
 !------------------------------------------------------------------
 module rebin 
 
-  real   , allocatable :: reb_freq(:), reb_pds(:), reb_err_pds(:)
+  double precision, allocatable :: reb_freq(:), reb_pds(:), reb_err_pds(:)
   
 contains 
   subroutine rebin_PDS(freq, pds_int, int_number, int_len_dim, reb_dim)
     implicit none
 
-    integer, intent(IN)  :: int_number, int_len_dim
-    real   , intent(IN)  :: freq(int_len_dim / 2), pds_int(int_number, int_len_dim / 2)
+    integer         , intent(IN)  :: int_number, int_len_dim
+    double precision, intent(IN)  :: freq(int_len_dim / 2), pds_int(int_number, int_len_dim / 2)
 
     integer              :: i, j, k, reb_dim, start, end_reb
-    real                 :: reb_fac
+    double precision     :: reb_fac
     integer, allocatable :: reb_array(:)
-    real   , allocatable :: reb_pds2(:)    
+    double precision, allocatable :: reb_pds2(:)    
 
 
     if(allocated(reb_array  )) deallocate(reb_array)
@@ -39,8 +39,8 @@ contains
     allocate(reb_pds2   (reb_dim))
     allocate(reb_err_pds(reb_dim))
 
-    reb_pds  = 0.0
-    reb_pds2 = 0.0
+    reb_pds  = 0.d0
+    reb_pds2 = 0.d0
 
     write(*,*) 'ciao ciao ', reb_array
 
@@ -95,11 +95,11 @@ contains
       subroutine rebin_log(vector, rebin_vector, rebin_array, dim, nf, c)
         implicit none
 
-        integer, intent(IN)    :: dim
-        integer, intent(INOUT) :: nf
-        integer, intent(OUT)   :: rebin_array(dim)
-        real   , intent(IN)    :: vector(dim), c 
-        real   , intent(OUT)   :: rebin_vector(dim)
+        integer         , intent(IN)    :: dim
+        integer         , intent(INOUT) :: nf
+        integer         , intent(OUT)   :: rebin_array(dim)
+        double precision, intent(IN)    :: vector(dim), c 
+        double precision, intent(OUT)   :: rebin_vector(dim)
 
         integer                :: i, j, nnp, remain, cont
         integer, allocatable   :: iar(:), np(:)
@@ -147,7 +147,7 @@ contains
         
 ! Now do the binning
         do j = 0, nf - 1
-           rebin_vector(j + 1)  = 0.0
+           rebin_vector(j + 1)  = 0.d0
            cont = 0
            do i = iar(j) + 1,iar(j + 1)
               cont = cont + 1
