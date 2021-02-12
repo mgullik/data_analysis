@@ -1,19 +1,25 @@
-subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
+subroutine make_PDS_FPMA_B(freq, lc_intA, lc_intB, int_number, int_len_dim, pds, err_pds)
   use rebin
   implicit none
 
   integer, intent(IN)  :: int_number, int_len_dim
-  double precision, intent(IN)  :: lc_int(int_number, int_len_dim), freq(int_len_dim /2)
-  double precision, intent(OUT) :: pds(int_len_dim /2), err_pds(int_len_dim /2)
+  double precision, intent(IN)  :: lc_intA(int_number, int_len_dim),&
+                                   lc_intB(int_number, int_len_dim), &
+                                   freq(int_len_dim /2)
+  double precision, intent(OUT) :: pds(int_len_dim /2), &
+                                   err_pds(int_len_dim /2)
 
   integer              :: i, j, reb_dim
-  double precision, allocatable :: pds_int(:,:), pds2(:)
+  double precision, allocatable :: pds_intA(:,:), pds_intB(:,:), &
+                                   pds2(:)
   character (len = 200):: name_base_2
   logical              :: yes_no
   
-  if(.not. allocated(pds_int)) allocate(pds_int(int_number, int_len_dim/2))
+  if(.not. allocated(pds_intA)) allocate(pds_intA(int_number, int_len_dim/2))
+  if(.not. allocated(pds_intB)) allocate(pds_intB(int_number, int_len_dim/2))
   do i = 1, int_number
-     call periodogram_frac_rms(lc_int(i,:), pds_int(i, :), int_len_dim)
+     call periodogram_frac_rms(lc_intA(i,:), pds_intA(i, :), int_len_dim)
+     call periodogram_frac_rms(lc_intB(i,:), pds_intB(i, :), int_len_dim)
   enddo
 
   if(.not. allocated(pds2)) allocate(pds2(int_len_dim/2))
@@ -21,23 +27,25 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
   pds2 = 0.0
   do j = 1, int_len_dim / 2 
      do i = 1, int_number
-        pds  (j) = pds  (j) + pds_int(i, j)
-        pds2 (j) = pds2 (j) + pds_int(i, j) * pds_int(i, j)
+        pds  (j) = pds  (j) + pds_intA(i, j)
+        pds  (j) = pds  (j) + pds_intB(i, j)
+        pds2 (j) = pds2 (j) + pds_intA(i, j) * pds_intA(i, j)
+        pds2 (j) = pds2 (j) + pds_intB(i, j) * pds_intB(i, j)
      enddo
   enddo
-  pds  = pds  / dble(int_number)
-  pds2 = pds2 / dble(int_number)
+  pds  = pds  / dble(2 * int_number)
+  pds2 = pds2 / dble(2 * int_number)
 
   do j = 1, int_len_dim / 2 - 1
-     err_pds(j) = sqrt((pds2(j) - pds(j)**2) / dble(int_number))
+     err_pds(j) = sqrt((pds2(j) - pds(j)**2) / dble(2 * int_number))
   enddo
   
 
 !------------------- PRINT and REBIN ---------------------
   
-  if (yes_no('   Do you want to save the PDS of the light curve?')) then
+  if (yes_no('   Do you want to save the PDS combining FPM A and B together?')) then
      
-      name_base_2 = 'PDS.qdp'  
+      name_base_2 = 'PDS_FPMs.qdp'  
       write(*,*) '   The name the PDS file is ', trim(name_base_2)
       open(71, file = trim(name_base_2))
       write(71, *) 'skip on'
@@ -47,20 +55,16 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
       enddo
       write(71, *) 'no no'
       write(71, *) 'log x y on'
-      write(71, *) 'scr white'
-      write(71, *) 'lw 5'
-      write(71, *) 'la x Frequency [Hz]'
-      write(71, *) 'la y Power [rms\u2]'
-      write(71, *) 't off'
-
       close(71)
 
-! -------------- REBIN --------------      
-666   continue 
+! -------------- REBIN --------------
+      666 continue 
       if (yes_no('   Do you want to rebin the PDS?')) then
          ! If(.not. allocated(Reb_Freq) ) allocate(Reb_freq (int_len_dim /2))
-         call rebin_PDS(freq, pds_int, int_number, int_len_dim, reb_dim)
-         name_base_2 = 'PDS_reb.qdp'  
+
+         call rebin_PDS_FPMA_B(freq, pds_intA, pds_intB, int_number, int_len_dim, reb_dim)
+
+         name_base_2 = 'PDS_FPMs_reb.qdp'  
          write(*,*) '   The name the rebinned PDS is ', trim(name_base_2)
          open(71, file = trim(name_base_2))
          write(71, *) 'skip on'
@@ -71,11 +75,6 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
          enddo
          write(71, *) 'no no'
          write(71, *) 'log x y on'
-         write(71, *) 'scr white'
-         write(71, *) 'lw 5'
-         write(71, *) 'la x Frequency [Hz]'
-         write(71, *) 'la y Power [rms\u2]'
-         write(71, *) 't off'
          close(71)
          
       endif
@@ -84,8 +83,6 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
       else
          goto 666
       endif
-
-      
 !--------------- Print final statements ---------------
       write(*,*)
       write(*,*) '   The normalisation of the PDS is rms-squared (see Uttley et al 2014 Eq.3)'
@@ -96,8 +93,9 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
 
    endif  ! end of the print and rebin stuff
 
-   if (allocated(pds_int)) deallocate(pds_int)
-   if (allocated(pds2   )) deallocate(pds2   )
+   if (allocated(pds_intA)) deallocate(pds_intA)
+   if (allocated(pds_intB)) deallocate(pds_intB)
+   if (allocated(pds2    )) deallocate(pds2    )
 
   
- end subroutine make_PDS
+ end subroutine make_PDS_FPMA_B

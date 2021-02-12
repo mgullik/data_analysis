@@ -329,8 +329,8 @@
       split_ind(1) = 1
       
 !First step
-      write(*,*) 'First time of the light curve ', time(1)
-      write(*,*) 'First time of the first GTI', start_GTI(1)
+      ! write(*,*) 'First time of the light curve ', time(1)
+      ! write(*,*) 'First time of the first GTI', start_GTI(1)
       if( (time(1) .ge. start_GTI(1))  .and. (time(1) .le. end_GTI(1)) ) then
          count = count + 1
       endif

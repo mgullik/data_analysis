@@ -1,6 +1,7 @@
 main_freq = main_lag_freq.f90
 main_ener = main_lag_ener.f90
-main_old  = re_im_freq.f90
+lc2pds    = main_lc_pds.f90
+lc2pds_nu = main_lc_pds_nustar.f90
 
 libs = -L ~/Software/cfitsio/ \
 -L/Users/gullo/Software/heasoft-6.28/x86_64-apple-darwin18.7.0/lib\
@@ -27,18 +28,23 @@ objs_freq:
 	$(comp) $(incs) $(libs) -c $(main_freq)
 objs_ener:
 	$(comp) $(incs) $(libs) -c $(main_ener)
+objs_lc:
+	$(comp) $(incs) $(libs) -c $(lc2pds)
+objs_lc_nu:
+	$(comp) $(incs) $(libs) -c $(lc2pds_nu)
 
-freq: clean_products modul objs_freq
+freq: clean modul objs_freq
 	$(comp)  $(incs) $(libs) *.o -o freq
 
-ener: clean_products modul objs_ener
+ener: clean modul objs_ener
 	$(comp)  $(incs) $(libs) *.o -o ener
 
-old:
-	$(comp) $(main_old) $(incs) $(libs) -o old_lag_freq
+lc2pds: clean modul objs_lc 
+	$(comp)  $(incs) $(libs) *.o -o lc2pds
+
+lc2pds_nu: clean modul objs_lc_nu
+	$(comp)  $(incs) $(libs) *.o -o lc2pds_nu
 
 clean:
-	rm -f *.o *~ subroutines/*~ ener freq
+	rm -f *.o *~ subroutines/*~ ener freq lc2pds lc2pds_nu
 
-clean_products:
-	rm -f *.o *~ subroutines/*~ lag_freq_err_prop.dat lag_freq_err_cohe.dat cross_spec_imaginary_vs_freq.dat cross_spec_real_vs_freq.dat freq ener old_freq

@@ -23,7 +23,7 @@ contains
     if(allocated(reb_pds2   )) deallocate(reb_pds2 )
 
 
-    write(*,*) 'Choose exponensial rebinning factor'
+    write(*,*) '   Choose exponensial rebinning factor'
     read(*,*) reb_fac
     print *, ' '
 
@@ -33,7 +33,7 @@ contains
 !Finds out the dimension of the rebinned array and the rebin indexes
     call rebin_log(freq, reb_freq, reb_array, int_len_dim / 2, reb_dim, reb_fac)
 
-    write(*,*) 'ciao ', reb_dim
+    ! write(*,*) 'ciao ', reb_dim
     
     allocate(reb_pds    (reb_dim))
     allocate(reb_pds2   (reb_dim))
@@ -42,7 +42,7 @@ contains
     reb_pds  = 0.d0
     reb_pds2 = 0.d0
 
-    write(*,*) 'ciao ciao ', reb_array
+    ! write(*,*) 'ciao ciao ', reb_array
 
        
        
@@ -61,9 +61,9 @@ contains
     enddo
 
     do j = 1, reb_dim
-       reb_pds (j) = reb_pds (j) / real(int_number * reb_array(j))
-       reb_pds2(j) = reb_pds2(j) / real(int_number * reb_array(j))
-       reb_err_pds(j) = sqrt((reb_pds2(j) - reb_pds(j)**2 ) / real(int_number * reb_array(j)))
+       reb_pds (j) = reb_pds (j) / dble(int_number * reb_array(j))
+       reb_pds2(j) = reb_pds2(j) / dble(int_number * reb_array(j))
+       reb_err_pds(j) = sqrt((reb_pds2(j) - reb_pds(j)**2 ) / dble(int_number * reb_array(j)))
        
     enddo
 
@@ -72,6 +72,74 @@ contains
 
   end subroutine rebin_PDS
 
+  subroutine rebin_PDS_FPMA_B(freq, pds_intA, pds_intB, int_number, int_len_dim, reb_dim)
+    implicit none
+
+    integer         , intent(IN)  :: int_number, int_len_dim
+    double precision, intent(IN)  :: freq(int_len_dim / 2), &
+         pds_intA(int_number, int_len_dim / 2), &
+         pds_intB(int_number, int_len_dim / 2)
+
+    integer              :: i, j, k, reb_dim, start, end_reb
+    double precision     :: reb_fac
+    integer, allocatable :: reb_array(:)
+    double precision, allocatable :: reb_pds2(:)    
+
+
+    if(allocated(reb_array  )) deallocate(reb_array)
+    if(allocated(reb_freq   )) deallocate(reb_freq)
+    if(allocated(reb_pds    )) deallocate(reb_pds )
+    if(allocated(reb_err_pds)) deallocate(reb_err_pds)
+    if(allocated(reb_pds2   )) deallocate(reb_pds2 )
+
+
+    write(*,*) '   Choose exponensial rebinning factor'
+    read(*,*) reb_fac
+    print *, ' '
+
+    allocate(reb_freq (int_len_dim /2))
+    allocate(reb_array(int_len_dim /2))
+
+!Finds out the dimension of the rebinned array and the rebin indexes
+    call rebin_log(freq, reb_freq, reb_array, int_len_dim / 2, reb_dim, reb_fac)
+
+    
+    allocate(reb_pds    (reb_dim))
+    allocate(reb_pds2   (reb_dim))
+    allocate(reb_err_pds(reb_dim))
+
+    reb_pds  = 0.d0
+    reb_pds2 = 0.d0
+
+    do i = 1, int_number
+       start   = 0
+       end_reb = 0
+       do j = 1, reb_dim
+          start   = end_reb + 1 
+          end_reb = end_reb + reb_array(j)
+
+          do k = start, end_reb
+             reb_pds (j) = reb_pds (j) + pds_intA(i, k)
+             reb_pds (j) = reb_pds (j) + pds_intB(i, k)
+             reb_pds2(j) = reb_pds2(j) + pds_intA(i, k) **2
+             reb_pds2(j) = reb_pds2(j) + pds_intB(i, k) **2
+          enddo
+       enddo
+    enddo
+
+    do j = 1, reb_dim
+       reb_pds (j) = reb_pds (j) / dble(2 * int_number * reb_array(j))
+       reb_pds2(j) = reb_pds2(j) / dble(2 * int_number * reb_array(j))
+       reb_err_pds(j) = sqrt((reb_pds2(j) - reb_pds(j)**2 ) / dble(2 * int_number * reb_array(j)))
+       
+    enddo
+
+    if (allocated(reb_array)) deallocate(reb_array)
+    if (allocated(reb_pds2 )) deallocate(reb_pds2)
+
+  end subroutine rebin_PDS_FPMA_B
+
+  
 !-----------------------------------------------------------------------
 !     PURPOUSE:  Logarithmic rebin of a vector. Find how many bins (nf) 
 !     the logarithmic rebinned vector has. c is the binning factor, 
