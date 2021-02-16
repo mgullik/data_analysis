@@ -315,7 +315,7 @@
       logical, intent(OUT) :: check_interval
       
       integer :: i, j, count, count2
-      logical :: check
+      logical :: check, check_jump
 
 
       if(.not. allocated(split_ind)) allocate(split_ind(dim_lc))
@@ -337,17 +337,22 @@
 
       
       do i = 2 , dim_lc
-         ! write(*,*) 'time index', i
+         ! write(*,*) 'time index', i, time(i)
+         check_jump = .false. 
          check = .false.
          if ((time(i) - time(i - 1)) .gt. 2.d0 * dt  ) then
             ! write(*,*) 'jump in time of the light curve'
             ! write(*,*) 'from ', time(i - 1), 'to ', time(i)
-            count = 0
-            
+            do j = 1, dim_GTI
+               if( (time(i) .ge. start_GTI(j))  .and. (time(i) .le. end_GTI(j)) ) then
+                  check_jump = .true. 
+                  exit
+               endif
+            enddo
          else 
             
             do j = 1, dim_GTI
-               ! write(*,*) time(i), start_GTI(j), end_GTI(j) 
+               ! write(*,*) 'ciao ', time(i), start_GTI(j), end_GTI(j) 
                if( (time(i) .ge. start_GTI(j))  .and. (time(i) .le. end_GTI(j)) ) then
                   check = .true.
                   ! write(*,*) 'exit', check
@@ -355,14 +360,20 @@
                endif
             enddo
          endif
-         
+            
         if (check) then
            count = count + 1
-           ! write(11,*) check, count
+           ! write(*,*) check, count
         else 
            count = 0
-           ! write(22,*) check, time(i), count
-           split_ind((count2 * 2) - 1) = i + 1
+           ! write(*,*) check, time(i), count
+           if (check_jump) then
+              count = 1
+              split_ind((count2 * 2) - 1) = i
+           else
+              split_ind((count2 * 2) - 1) = i + 1
+           endif
+              ! split_ind((count2 * 2) - 1) = i + 1
         end if
         
         if (count .eq. int_len_dim) then
@@ -373,6 +384,8 @@
         end if        
      enddo
 
+     ! write(*,*) split_ind
+     
      int_number = count2 - 1 ! There is always one more than what we need 
 ! Check if there are at least one interval in the light curve (it can happen that the light curve has too many holes or the int_len_dim is too big)
      check_interval = .true.

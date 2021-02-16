@@ -20,14 +20,14 @@
 ! if the extension is not RATE the code asks for a new name until it gets a right one      
       do while(status .eq. 301)
          write(*,*) "   No extension called: ",hdu_name
-         write(*,*) "   Please specify the correct name or type 'no' to quit"
+         write(*,*) "   Please specify the correct name or type 'no' to quit (in the case of GTI extension you can choose the GTI manually)"
          read(*,*) hdu_name
-         if (hdu_name .eq. 'no') stop
+         if (hdu_name .eq. 'no') goto 111
          hdutype = -1
          hdu_extver = 0
          status = 0
          call ftmnhd(unit,hdutype,hdu_name,hdu_extver,status)
       enddo
-     
+111   continue 
     end subroutine  hdu_move
 !---------------------------------------------------------------------!

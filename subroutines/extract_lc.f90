@@ -8,7 +8,7 @@
 
       character (len=30)  :: error_description, hdu_name &
                              ,col_name_temp, keyword
-      logical             :: anynul
+      logical             :: anynul, yes_no
       integer             :: i, status, readwrite, blocksize, unit, chdu  &
                              ,nrow, nrow_GTI, ncol, ncol_GTI, colnum & 
                              ,felem, nelem, datacode, repeat, width, frow
@@ -50,6 +50,7 @@
       hdu_name = 'RATE'
       call hdu_move(unit,hdu_name,status)
       call ftghdn(unit,chdu)
+      if (status .eq. 301) stop 
       status = 0 
 !      write(*,*) '   Current hdu',chdu
 
@@ -188,111 +189,6 @@
       ! endif
 !**************************************************************!      
 
-
-            
-! extract the dt from fits file with dt_f (function)
-      keyword = 'TIMEDEL'
-      dt_temp = dt
-      dt = dt_f(unit,keyword,status)
-!      write(*,*) 'dt', dt
-
-! Check if the dt is equal to the previous one, besides the first time the dt is calculated (starting dt=-1)
-      if(dt_temp .ne. -1) then 
-         if (dt .ne. dt_temp) then
-            write(*,*) '   dt of this new light curve is different from the previous one'
-            write(*,*) '   to make the cross spectrum you need to have the same dt. EXIT...'
-            stop
-         endif
-      endif
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
-      ! ! GET THE GTI ARRAY
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
-!Let's move in the correct HDU (with the name in hdu_name)      
-      hdu_name = 'GTI'
-      call hdu_move(unit, hdu_name,status)
-      if( status .gt. 0 ) call printerror(status)
-      call ftghdn(unit, chdu)
-      if( status .gt. 0 ) call printerror(status)
-      status = 0 
-! Get the number of rows and columns in the CHDU
-! and check if the number of columns is equal to 2      
-      call ftgnrw(unit, nrow_GTI, status)
-      call ftgncl(unit, ncol_GTI, status)
-      if (ncol_GTI .ne. 2) then
-         write(*,*) '    The selected GTI extension has not 2 columns! Exit...'
-         stop
-      endif
-      
-!**************************************************************!      
-      col_name_temp = '*START*'
-      colnum = colnum_f(unit, col_name_temp, status)
-      if (colnum .gt. 0.0) then 
-         write(*,*) '     GTI START found'
-         call ftgtcl(unit, colnum, datacode, repeat, width, status)
-         if( status .gt. 0 )call printerror(status)
-         
-         frow    = 1 !starting row
-         nelem   = nrow_GTI ! last row to read
-         felem   = 1 ! first pixel of the element vector (ignored for ASCII tables)
-         nullval = -1
-         if(datacode .eq. 42) then
-            write(*,*) '     real type'
-            if(.not.allocated(start_GTI_e)) allocate(start_GTI_e(nrow_GTI))
-            call ftgcve(unit, colnum, frow, felem, nelem, nullval, start_GTI_e, anynul, status)         
-         else if (datacode .eq. 82) then
-            write(*,*) '     double type'
-            if(.not.allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
-            call ftgcvd(unit, colnum, frow, felem, nelem, nullval, start_GTI_d, anynul, status)         
-         else
-            write(*,*) "   START GTI column is niether an real nor a double"
-            write(*,*) "   Modify the source code"
-         endif
-      else
-         write(*,*) '    GTI START NOT found, exit...'
-         write(*,*) '    Check the fits file for exact name of the column '
-         stop 
-         
-   end if
-!**************************************************************!      
-
-!**************************************************************!      
-      col_name_temp = '*STOP*'
-      colnum = colnum_f(unit, col_name_temp, status)
-      if (colnum .gt. 0.0) then 
-         write(*,*) '     GTI STOP found'
-         
-         call ftgtcl(unit, colnum, datacode, repeat, width, status)
-         if( status .gt. 0 )call printerror(status)
-
-         frow    = 1        !starting row
-         nelem   = nrow_GTI ! last row to read
-         felem   = 1        ! first pixel of the element vector (ignored for ASCII tables)
-         nullval = -1
-         if(datacode .eq. 42) then
-            write(*,*) '     real type'
-            if(.not.allocated(end_GTI_e)) allocate(end_GTI_e(nrow_GTI))
-            call ftgcve(unit, colnum, frow, felem, nelem, nullval, end_GTI_e, anynul, status)         
-         else if (datacode .eq. 82) then
-            write(*,*) '     double type'
-            if(.not.allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
-            call ftgcvd(unit, colnum, frow, felem, nelem, nullval, end_GTI_d, anynul, status)         
-         else
-            write(*,*) "   END GTI column is niether an real nor a double"
-            write(*,*) "   Modify the source code"
-         end if
-      else
-         write(*,*) '    GTI STOP NOT found, exit...'
-         write(*,*) '    Check the fits file for exact name of the column '
-         stop
-      endif
-      write(*,*) 
-      write(*,*) '   Extraction ended'
-      write(*,*) '------------------------------------------'
- !**************************************************************!
-   
-
 !CONVERSION FROM REAL TO DOUBLE PRECISION OF TIME
       if (allocated(time_e)) then
          if(.not. allocated(time_d)) allocate(time_d(nrow))
@@ -325,33 +221,168 @@
          deallocate(err_rate_e)
       endif
 
-         
-      if (allocated(start_GTI_e)) then
-         if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
-         first_time_bin_GTI = dble(start_GTI_e(1)) 
-         do i = 1, nrow_GTI
-            start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
-         enddo
-         deallocate(start_GTI_e)
-      else
-         first_time_bin_GTI = start_GTI_d(1) 
-         do i = 1, nrow_GTI
-            start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
-         enddo
-         
+            
+! extract the dt from fits file with dt_f (function)
+      keyword = 'TIMEDEL'
+      dt_temp = dt
+      dt = dt_f(unit,keyword,status)
+!      write(*,*) 'dt', dt
+
+! Check if the dt is equal to the previous one, besides the first time the dt is calculated (starting dt=-1)
+      if(dt_temp .ne. -1) then 
+         if (dt .ne. dt_temp) then
+            write(*,*) '   dt of this new light curve is different from the previous one'
+            write(*,*) '   to make the cross spectrum you need to have the same dt. EXIT...'
+            stop
+         endif
       endif
 
-       if (allocated(end_GTI_e)) then
-         if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
-         do i = 1, nrow_GTI
-            end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
-         enddo
-         deallocate(end_GTI_e)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
+      ! ! GET THE GTI ARRAY
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
+!Let's move in the correct HDU (with the name in hdu_name)      
+      hdu_name = 'GTI'
+      call hdu_move(unit, hdu_name,status)
+      if (status .eq. 301) then
+         if (yes_no('   Do you want to consider the full light curve length as GTI')) then
+            nrow_GTI = 1
+            if(.not.allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI)) 
+            if(.not.allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+            start_GTI_d = 0.d0
+            end_GTI_d   = time_d(nrow) + 1.d0
+            status = 0
+         else
+            if (yes_no('   Do you want to manually write the GTI?')) then
+               write(*,*) '     How many intervals in the GTI? (integer)'
+               read(*,*) nrow_GTI
+               if(.not.allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI)) 
+               if(.not.allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+               do i = 1, nrow_GTI
+                  write(*,'(A,I2)') '     Interval number:', i
+                  write(*,*) '     Insert start GTI time'
+                  read (*,*) start_GTI_d(i) 
+                  write(*,*) '     Insert end GTI time'
+                  read (*,*) end_GTI_d(i) 
+               enddo
+            else
+               write(*,*)'    Options are finished...exit'               
+               stop
+            endif
+         endif
+
       else
-         do i = 1, nrow_GTI
-            end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
-         enddo
+
+         call ftghdn(unit, chdu)
+         if( status .gt. 0 ) call printerror(status)
+         status = 0 
+! Get the number of rows and columns in the CHDU
+! and check if the number of columns is equal to 2      
+         call ftgnrw(unit, nrow_GTI, status)
+         call ftgncl(unit, ncol_GTI, status)
+         if (ncol_GTI .ne. 2) then
+            write(*,*) '    The selected GTI extension has not 2 columns! Exit...'
+            stop
+         endif
+      
+!**************************************************************!      
+         col_name_temp = '*START*'
+         colnum = colnum_f(unit, col_name_temp, status)
+         if (colnum .gt. 0.0) then 
+            write(*,*) '     GTI START found'
+            call ftgtcl(unit, colnum, datacode, repeat, width, status)
+            if( status .gt. 0 )call printerror(status)
+
+            frow    = 1 !starting row
+            nelem   = nrow_GTI ! last row to read
+            felem   = 1 ! first pixel of the element vector (ignored for ASCII tables)
+            nullval = -1
+            if(datacode .eq. 42) then
+               write(*,*) '     real type'
+               if(.not.allocated(start_GTI_e)) allocate(start_GTI_e(nrow_GTI))
+               call ftgcve(unit, colnum, frow, felem, nelem, nullval, start_GTI_e, anynul, status)         
+            else if (datacode .eq. 82) then
+               write(*,*) '     double type'
+               if(.not.allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+               call ftgcvd(unit, colnum, frow, felem, nelem, nullval, start_GTI_d, anynul, status)         
+            else
+               write(*,*) "   START GTI column is niether an real nor a double"
+               write(*,*) "   Modify the source code"
+            endif
+         else
+            write(*,*) '    GTI START NOT found, exit...'
+            write(*,*) '    Check the fits file for exact name of the column '
+            stop 
+
+         end if
+!**************************************************************!      
+
+!**************************************************************!      
+         col_name_temp = '*STOP*'
+         colnum = colnum_f(unit, col_name_temp, status)
+         if (colnum .gt. 0.0) then 
+            write(*,*) '     GTI STOP found'
+
+            call ftgtcl(unit, colnum, datacode, repeat, width, status)
+            if( status .gt. 0 )call printerror(status)
+
+            frow    = 1        !starting row
+            nelem   = nrow_GTI ! last row to read
+            felem   = 1        ! first pixel of the element vector (ignored for ASCII tables)
+            nullval = -1
+            if(datacode .eq. 42) then
+               write(*,*) '     real type'
+               if(.not.allocated(end_GTI_e)) allocate(end_GTI_e(nrow_GTI))
+               call ftgcve(unit, colnum, frow, felem, nelem, nullval, end_GTI_e, anynul, status)         
+            else if (datacode .eq. 82) then
+               write(*,*) '     double type'
+               if(.not.allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+               call ftgcvd(unit, colnum, frow, felem, nelem, nullval, end_GTI_d, anynul, status)         
+            else
+               write(*,*) "   END GTI column is niether an real nor a double"
+               write(*,*) "   Modify the source code"
+            end if
+         else
+            write(*,*) '    GTI STOP NOT found, exit...'
+            write(*,*) '    Check the fits file for exact name of the column '
+            stop
+         endif
+         write(*,*) 
+         write(*,*) '   Extraction ended'
+         write(*,*) '------------------------------------------'
+ !**************************************************************!
+
+
+!CONVERSION FROM REAL TO DOUBLE PRECISION         
+         if (allocated(start_GTI_e)) then
+            if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+            first_time_bin_GTI = dble(start_GTI_e(1)) 
+            do i = 1, nrow_GTI
+               start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
+            enddo
+            deallocate(start_GTI_e)
+         else
+            first_time_bin_GTI = start_GTI_d(1) 
+            do i = 1, nrow_GTI
+               start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
+            enddo
+
+         endif
+
+         if (allocated(end_GTI_e)) then
+            if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+            do i = 1, nrow_GTI
+               end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
+            enddo
+            deallocate(end_GTI_e)
+         else
+            do i = 1, nrow_GTI
+               end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
+            enddo
+         endif
+   
       endif
+
 
 !HERE it is possible to print the GTI and the gaps
       ! write(*,*) '-----------------------------------------'
@@ -374,7 +405,6 @@
       !    write(98,*) start_GTI_d(i),end_GTI_d(i)
       ! enddo
 
-
       ! write(*,*) 'First time bin of the GTI', first_time_bin
       ! write(*,*)
 
@@ -389,25 +419,30 @@
          endif
       endif
       
-      if(.not. allocated(time) ) allocate(time (nrow))
-      if(.not. allocated(err_rate)) allocate(err_rate(nrow))
-      if(.not. allocated(bkg)  ) allocate(bkg  (nrow))
+      ! if(.not. allocated(bkg)  ) allocate(bkg  (nrow))
 
 !Set the dimension of the lc and write the lc, time, and bkg in the common arrays
       dim_lc = nrow
-      
-      do i = 1, nrow
-         time(i) = time_d(i)
-      enddo
 
-      do i = 1, nrow
-         lc(i)   = rate_d(i)
-      enddo
+      if (allocated(time_d)) then
+         if(.not. allocated(time) ) allocate(time (nrow))
+         do i = 1, nrow
+            time(i) = time_d(i)
+         enddo
+      endif
 
-      do i = 1, nrow
-         err_rate(i)  = err_rate_d(i)
-      enddo
+      if (allocated(rate_d)) then
+         do i = 1, nrow
+            lc(i)   = rate_d(i)
+         enddo
+      endif
 
+      if (allocated(err_rate_d)) then
+         if(.not. allocated(err_rate)) allocate(err_rate(nrow))
+         do i = 1, nrow
+            err_rate(i)  = err_rate_d(i)
+         enddo
+      endif
       
 !Fill the GTI 
 !It is complicated because we have to distinguish between the first call and the others
@@ -442,6 +477,7 @@
          endif
       endif
 
+      
 ! Close and show if there are errors      
       call ftclos(unit,status)
       call ftgerr(status,error_description)

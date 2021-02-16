@@ -13,11 +13,13 @@
       do while(status .ne. 0)
          if (status .eq. 219) then
             call ftgerr(status,error_description)
-            write(*,*) '!! ATTENTION !! ',error_description
-            write(*,*) "   Change the name of the column (type 'no' to avoid)"
+            write(*,'(A,A,A,A)') '!! ATTENTION !! ', trim(error_description) ,': ', col_name_temp 
+            write(*,*) "   Change the name of the column (type no to avoid)"
             read(*,*)  col_name_temp
             if (col_name_temp .eq. 'no') then
+               write(*,*) '   Column avoided'
                colnum_f = -1
+               logic = .true.
                goto 11
             else
                logic = .false.

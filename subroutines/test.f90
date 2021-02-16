@@ -26,7 +26,7 @@ subroutine test_lc_parameters()
   filename = 'tests/test_parameters.txt'
   open(70, file = filename)
 
-  write(70, *) 'light curve dimension', dim_lc
+  write(70, *) 'number of bins in the light curve ', dim_lc
   write(70, *) 'number of GTI intervals ', dim_GTI
   write(70, *) 'number of intervals',  int_number 
   

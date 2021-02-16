@@ -39,6 +39,7 @@ program cross
   call load_lc_lag_freq(filename1, filename2)
 
   ! call run_test()
+
   
   write(*,*)
   write(*,*)
@@ -123,6 +124,14 @@ program cross
     write(*,*) 
 
     call make_freq_array()
+    ! do i = 1, int_number
+    !    do jj = 1, int_len_dim / 2
+    !       write(10,*)  freq(jj), df, rc_freq(i, jj)
+    !       write(11,*)  freq(jj), df, ic_freq(i, jj)
+    !    enddo
+    !    write(10,*)'no no'
+    !    write(11,*)'no no'
+    ! enddo
         
    if(.not. allocated(lag_freq    )) allocate(lag_freq    (int_len_dim / 2)) 
    if(.not. allocated(std_rc_freq_ave  )) allocate(std_rc_freq_ave  (int_len_dim / 2)) 
@@ -217,9 +226,7 @@ program cross
    write(11, *) 'log x on'
    write(12, *) 'log x on'
    write(13, *) 'log x on'
-   write(13, *) 'r y -0.1 0.1'
    write(14, *) 'log x on'
-   write(14, *) 'r y -0.1 0.1'
 
    write(11, *) 'no no'
    write(12, *) 'no no'

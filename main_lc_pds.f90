@@ -10,12 +10,25 @@ program ls_to_pds
   character (len = 200) :: filename, lc_name 
   logical               :: yes_no
   
-  ! filename = '/Users/gullo/Work/BHB_project/Gx339/2021_outburst/spec/nu90702303003_srcA_jg_sr.lc'
+  filename = '/Users/gullo/Work/BHB_project/CygX1_Ole/sinusoid_gaps.fits'
   ! filename = '/Users/gullo/Work/StrayCats/maxij1535/80302312002/products/nu80302312002A01_full_FoV_3to80_01s_sr.lc'
   ! filename = '/Users/gullo/Work/StrayCats/maxij1535/80302312002/products/nu80302312002B01_full_FoV_3to80_01s_sr.lc'
   
   call load_single_lc(filename)
 
+
+  ! open(10, file = 'Ole_lc_split.qdp')
+  ! write(10,*) 'skip on'
+  ! do i = 1, int_number
+  !    do j = 1, int_len_dim
+  !       write(10,*) lc_int(i, j)
+  !    enddo
+  !    write(10,*) 'no no'
+  ! enddo
+
+
+  
+  
   average_rate = 0.d0
   do i = 1, int_number
      do j = 1, int_len_dim

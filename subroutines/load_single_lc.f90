@@ -4,8 +4,8 @@ subroutine load_single_lc(filename)
 
   character (len=200)   :: filename
 
-    call extract_lc_nustar(filename)
-
+    call extract_lc(filename)
+    
     if (allocated(lc)) then 
        call split_lc()
     else
