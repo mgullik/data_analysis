@@ -2,21 +2,22 @@ include 'header.h'
 
 program cross
   use dyn_lc
-  use rand_fun
+  use rebin
   implicit none 
 
-  integer              :: i, jj
+  integer              :: i, j, jj, reb_dim
   character (len=200)  :: filename1, filename2, name_base
+  logical              :: yes_no
 
   double precision, parameter   :: pi = acos(-1.0)
   double precision              :: bias2
 
   double precision, allocatable :: rc_freq(:,:), ic_freq(:,:)
   double precision, allocatable :: pw_freq1(:,:), pw_freq2(:,:)
-  double precision, allocatable :: pw_freq1_ave(:), pw_freq2_ave(:),&
-                                   pw2_freq1_ave(:), pw2_freq2_ave(:)
+  double precision, allocatable :: pw_freq1_ave(:),pw_freq2_ave(:),&
+                                   pw2_freq1_ave(:),pw2_freq2_ave(:)
   double precision, allocatable :: rc_freq_ave(:), ic_freq_ave(:), &
-                                   rc2_freq_ave(:), ic2_freq_ave(:), &
+                                   rc2_freq_ave(:),ic2_freq_ave(:),&
                                    rc_ic_freq_ave(:)
 
   double precision, allocatable :: lag_freq(:), std_rc_freq_ave(:),&
@@ -58,12 +59,12 @@ program cross
           ! call   periodogram(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
 
 
-          ! call ncperiodogram_frac_rms(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum  
-          ! call   periodogram_frac_norm(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
-          ! call   periodogram_frac_norm(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
-          call ncperiodogram_no_norm(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum 
-          call   periodogram_no_norm(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
-          call   periodogram_no_norm(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
+          call ncperiodogram_frac_rms(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum  
+          call   periodogram_frac_rms(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
+          call   periodogram_frac_rms(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
+          ! call ncperiodogram_no_norm(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum 
+          ! call   periodogram_no_norm(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
+          ! call   periodogram_no_norm(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
          
           ! write(*,*) 'FFT done of interval ', i 
        else
@@ -109,7 +110,7 @@ program cross
           pw2_freq2_ave(jj)  = pw2_freq2_ave (jj) + (pw_freq2(i, jj) * pw_freq2(i, jj))
        enddo
     enddo
-
+    
     rc_freq_ave    = rc_freq_ave    / real(int_number)
     ic_freq_ave    = ic_freq_ave    / real(int_number)
     rc2_freq_ave   = rc2_freq_ave   / real(int_number)
@@ -184,9 +185,9 @@ program cross
 
 !Errors through standard deviation on real and imaginary part      
       !lag with propagation formula
-      std_rc_freq_ave(jj) = sqrt((rc2_freq_ave(jj) - (rc_freq_ave(jj) * rc_freq_ave(jj)) ))  / (sqrt(real(int_number)))
-      std_ic_freq_ave(jj) = sqrt((ic2_freq_ave(jj) - (ic_freq_ave(jj) * ic_freq_ave(jj)) ))  / (sqrt(real(int_number)))
-      covariance(jj) = (rc_ic_freq_ave(jj) - ((rc_freq_ave(jj) * ic_freq_ave(jj))))  / real(int_number)
+      std_rc_freq_ave(jj) = sqrt((rc2_freq_ave(jj) - (rc_freq_ave(jj) * rc_freq_ave(jj)) ))  / (sqrt(dble(int_number)))
+      std_ic_freq_ave(jj) = sqrt((ic2_freq_ave(jj) - (ic_freq_ave(jj) * ic_freq_ave(jj)) ))  / (sqrt(dble(int_number)))
+      covariance(jj) = (rc_ic_freq_ave(jj) - ((rc_freq_ave(jj) * ic_freq_ave(jj))))  / dble(int_number)
       ! covariance(jj) = 0.0 
       deriv_rc(jj) =  (-1.d0 *  ic_freq_ave(jj) / rc_freq_ave(jj)**2) / (1 + (ic_freq_ave(jj) / rc_freq_ave(jj))**2 )
       deriv_ic(jj) =                      (1.d0 / rc_freq_ave(jj))    / (1 + (ic_freq_ave(jj) / rc_freq_ave(jj))**2 )
@@ -205,7 +206,7 @@ program cross
 !Coherence and error on the lag with the coherence formula
       coher2_freq(jj) = (rc_freq_ave(jj)**2 + ic_freq_ave(jj)**2 - bias2) / (pw_freq1_ave(jj) * pw_freq2_ave(jj))
 
-      err_cohe_lag(jj) = sqrt( (1.d0 - coher2_freq(jj)) / (2.d0 * coher2_freq(jj) * real(int_number) ) ) / (2.d0 * pi * freq(jj)) 
+      err_cohe_lag(jj) = sqrt( (1.d0 - coher2_freq(jj)) / (2.d0 * coher2_freq(jj) * dble(int_number) ) ) / (2.d0 * pi * freq(jj)) 
 
       ! write(10,*) jj, freq(jj), coher2_freq(jj), rc_freq_ave(jj)**2, ic_freq_ave(jj)**2, pw_freq1_ave(jj),  pw_freq2_ave(jj)
 
@@ -239,5 +240,43 @@ program cross
 
     write(*,*) '   Lag and error calculation completed'
     write(*,*) 
+
+
+! -------------- REBIN --------------      
+666   continue 
+      if (yes_no('   Do you want to rebin the lag freq spectrum?')) then
+
+         call rebin_lag_freq(freq, rc_freq, ic_freq, pw_freq1, pw_freq2, int_number, int_len_dim, reb_dim)
+         name_base = 'lag_freq_err_reb.qdp'  
+         write(*,*) '   The name the rebinned lag vs freq is ', trim(name_base)
+         open(71, file = trim(name_base))
+         write(71, *) 'skip on'
+         write(71, *) 'read serr 1 2 3'
+         do j = 1, reb_dim - 1            
+            write(71, *) (reb_freq(j + 1) + reb_freq(j)) * 0.5, (reb_freq(j + 1) - reb_freq(j)) * 0.5, reb_lag_freq(j), reb_err_cohe_lag(j), reb_lag_freq(j), reb_err_prop_lag(j)
+         enddo
+         write(71, *) 'no no'
+         write(71, *) 'log x on'
+         write(71, *) 'scr white'
+         write(71, *) 'lw 5'
+         write(71, *) 'la x Frequency [Hz]'
+         write(71, *) 'la y Lag [s]'
+         write(71, *) 't off'
+         close(71)
+         
+      endif
+
+      write(*,*)
+      if (yes_no('   Are you satified with the rebin?')) then
+      else
+         goto 666
+      endif
+
+      write(*,*)
+      write(*,*) '   Rebin done'
+      write(*,*)
+      write(*,*) '   Analysis concluded'
+
+      
     
   end program cross

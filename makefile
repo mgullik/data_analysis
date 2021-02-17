@@ -48,3 +48,5 @@ lc2pds_nu: clean modul objs_lc_nu
 clean:
 	rm -f *.o *~ subroutines/*~ ener freq lc2pds lc2pds_nu
 
+clean_products:
+	rm -f lag_freq* lag_ener* freq_cross_* ener_* fort.*
