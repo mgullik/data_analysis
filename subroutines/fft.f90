@@ -3,7 +3,7 @@
 ! Calculates a cross spectrum between the time series ht(int_len_dim) and st(int_len_dim)
 ! Phase is such that +ve lag corresponds to ht lagging st
 ! ***MODIFIED*** from Press et al (1992) DFT definition, this is S^*(\nu)H(\nu)
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
         double precision , intent(IN)  :: ht(dim), st(dim) 
@@ -37,7 +37,7 @@
       subroutine periodogram_no_norm(time_series, pw, dim)
 ! Calculates power spectrum of the time series lc(dim)
 ! ***MODIFIED*** from Press et al (1992) DFT definition
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
         double precision , intent(IN)  :: time_series(dim)
@@ -67,15 +67,15 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-      subroutine ncperiodogram_frac_rms(ht, st, rc, ic, dim)
+      subroutine ncperiodogram_frac_rms(ht, st, rc, ic, dt, dim)
 ! Calculates a cross spectrum between the time series ht(int_len_dim) and st(int_len_dim)
 ! In fractional  rms normalisation
 ! Phase is such that +ve lag corresponds to ht lagging st
 ! ***MODIFIED*** from Press et al (1992) DFT definition, this is S^*(\nu)H(\nu)
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
-        double precision , intent(IN)  :: ht(dim), st(dim) 
+        double precision , intent(IN)  :: dt, ht(dim), st(dim) 
         double precision , intent(OUT) :: rc(dim / 2), ic(dim / 2) 
         integer              :: j
         double precision               :: meanh, means
@@ -109,14 +109,14 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-      subroutine periodogram_frac_rms(time_series, pw, dim)
+      subroutine periodogram_frac_rms(time_series, pw, dt, dim)
 ! Calculates power spectrum of the time series lc(dim)
 ! In fractional  rms normalisation
 ! ***MODIFIED*** from Press et al (1992) DFT definition
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
-        double precision , intent(IN)  :: time_series(dim)
+        double precision , intent(IN)  :: dt, time_series(dim)
         double precision , intent(OUT) :: pw(dim / 2)
 
         integer              :: j
@@ -145,15 +145,15 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-      subroutine ncperiodogram(ht, st, rc, ic, dim)
+      subroutine ncperiodogram(ht, st, rc, ic, dt, dim)
 ! Calculates a cross spectrum between the time series ht(int_len_dim) and st(int_len_dim)
 ! In absolute  rms normalisation
 ! Phase is such that +ve lag corresponds to ht lagging st
 ! ***MODIFIED*** from Press et al (1992) DFT definition, this is S^*(\nu)H(\nu)
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
-        double precision , intent(IN)  :: ht(dim), st(dim) 
+        double precision , intent(IN)  :: dt, ht(dim), st(dim) 
         double precision , intent(OUT) :: rc(dim / 2), ic(dim / 2) 
         integer              :: j
         double precision               :: meanh, means
@@ -187,44 +187,43 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-      subroutine periodogram(time_series, pw, dim)
+      subroutine periodogram(time_series, pw, dt, dim)
 ! Calculates power spectrum between the time series lc(dim)
 ! In absolute  rms normalisation
 ! Phase is such that +ve lag corresponds to ht lagging st
 ! ***MODIFIED*** from Press et al (1992) DFT definition
-        use dyn_lc
+        ! use dyn_lc
         implicit none
         integer, intent(IN)  :: dim
-        double precision , intent(IN)  :: time_series(dim)
+        double precision , intent(IN)  :: dt, time_series(dim)
         double precision , intent(OUT) :: pw(dim / 2)
 
         integer              :: j
-        double precision               :: mean !sum, var
+        ! double precision               :: mean, sum, var
         double precision ,allocatable  :: datah(:)
 
         if (.not. allocated(datah)) allocate(datah(2 * dim))
         ! sum = 0.0
-        
-
         do j = 1, dim
-           ! sum = sum + ht(j)**2
+           ! sum = sum + time_series(j)**2
            datah(2 * j - 1) = time_series(j)
            datah(2 * j)   = 0.d0
         end do
 
         call four1(datah, dim, 1)
-        mean = datah(1) / dim
-
+        ! mean = datah(1) / dim
+        ! write(*,*) 'mean ', mean
+        
         do j = 1, dim / 2
            pw(j) = (datah(2 * j + 1)**2 + datah(2 * j + 2 )**2) * 2.d0 * dt / (float(dim)) 
         end do
 
-!Check the Parcival theorem
+! !Check the Parcival theorem
 !         var = 0.0
 !         do j = 0, dim - 1
 ! !           write(*,*) 2 * j + 1, 2 * j + 2
 !            var = var + datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
-!            write(111,*) j, datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+!            ! write(111,*) j, datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
 !         enddo
 !         var = var / dim
 !         write(*,*)  'Parcival theorem'
@@ -245,30 +244,32 @@
 
 
 !------------------------------------------------------------------------
-      subroutine periodogram_leahy(ht, pw)
+      subroutine periodogram_leahy(ht, pw, dim)
 ! Calculates power spectrum between the time series ht(int_len_dim)
 ! In leahy normalisation 
 ! Phase is such that +ve lag corresponds to ht lagging st
 ! ***MODIFIED*** from Press et al (1992) DFT definition
-        use dyn_lc
+        ! use dyn_lc
         implicit none
-        double precision , intent(IN)  :: ht(int_len_dim)
-        double precision , intent(OUT) :: pw(int_len_dim / 2)
+        integer          , intent(IN)  :: dim
+        double precision , intent(IN)  :: ht(dim)
+        double precision , intent(OUT) :: pw(dim / 2)
 
         integer              :: j
-        double precision               :: mean
+        double precision               :: mean, sum
         double precision ,allocatable  :: datah(:)
 
-        if (.not. allocated(datah)) allocate(datah(2 * int_len_dim))
-        ! sum = 0.0
-        do j = 1, int_len_dim
-           ! sum = sum + ht(j)**2
+        if (.not. allocated(datah)) allocate(datah(2 * dim))
+        sum = 0.0
+        do j = 1, dim
+           sum = sum + ht(j)
            datah(2 * j - 1) = ht(j)
            datah(2 * j)   = 0.d0
         end do
-        call four1(datah, int_len_dim, 1)
-        mean = datah(1) / int_len_dim
-        do j = 1, int_len_dim / 2
+        call four1(datah, dim, 1)
+        ! write(*,*) ' number of photons: ', sum, datah(1)
+        mean = datah(1) / dim
+        do j = 1, dim / 2
            pw(j) = (datah(2 * j + 1)**2 + datah(2 * j + 2 )**2) * 2.d0 / datah(1)  
         end do
         

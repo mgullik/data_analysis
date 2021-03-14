@@ -4,7 +4,7 @@
       implicit none
 
 ! CFITSIO variable
-      character (len=200) :: filename
+      character (len=500) :: filename
 
       character (len=30)  :: error_description, hdu_name &
                              ,col_name_temp, keyword
@@ -29,9 +29,12 @@
       readwrite = 0  !file access mode: readonly = 0 , read and write = 1
 ! Get an unused Logical Unit Number to use to open the FITS file.
       call ftgiou(unit,status)
+      write(*,*) status 
+      
 ! Open the FITS file
       call ftopen(unit,filename,readwrite,blocksize,status)
-!      call ftnopn(unit,filename,readwrite,status)  !thisi is used with the extension in the name (e.g. namefile.fits+2)
+     ! call ftnopn(unit,filename,readwrite,status)  !thisi is used with the extension in the name (e.g. namefile.fits+2)
+      write(*,*) status 
       
       call ftgerr(status,error_description)
       if (status .ne. 0) then

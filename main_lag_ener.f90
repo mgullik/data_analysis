@@ -80,17 +80,17 @@ program cross
          do k = 1, en_num             
             do i = 1, int_number
                if (check_power2) then 
-                  ! call ncperiodogram(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
-                  ! call periodogram(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
-                  ! call periodogram(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
+                  ! call ncperiodogram(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), dt, int_len_dim) 
+                  ! call periodogram(lc_en(i, :, k), pw_en(i, :, k), dt, int_len_dim)
+                  ! call periodogram(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), dt, int_len_dim)
                   
-                  ! call ncperiodogram_frac_rms(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
-                  ! call periodogram_frac_rms(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
-                  ! call periodogram_frac_rms(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
+                  ! call ncperiodogram_frac_rms(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), dt, int_len_dim) 
+                  ! call periodogram_frac_rms(lc_en(i, :, k), pw_en(i, :, k), dt, int_len_dim)
+                  ! call periodogram_frac_rms(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), dt, int_len_dim)
 
-                  call ncperiodogram_no_norm(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), int_len_dim) 
-                  call periodogram_no_norm(lc_en(i, :, k), pw_en(i, :, k), int_len_dim)
-                  call periodogram_no_norm(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), int_len_dim)
+                  call ncperiodogram_no_norm(lc_en(i, :, k), lc_ref_cross(i, :, k), rc_en(i, :, k), ic_en(i, :, k), dt, int_len_dim) 
+                  call periodogram_no_norm(lc_en(i, :, k), pw_en(i, :, k), dt, int_len_dim)
+                  call periodogram_no_norm(lc_ref_cross(i, :, k), pw_ref_en(i, :, k), dt, int_len_dim)
                   
                ! write(*,*) 'FFT done', i
             else

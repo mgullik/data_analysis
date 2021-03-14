@@ -1,21 +1,50 @@
-subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
+subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
   use rebin
   implicit none
 
   integer, intent(IN)  :: int_number, int_len_dim
-  double precision, intent(IN)  :: lc_int(int_number, int_len_dim), freq(int_len_dim /2)
+  double precision, intent(IN)  :: dt, lc_int(int_number, int_len_dim), freq(int_len_dim /2)
   double precision, intent(OUT) :: pds(int_len_dim /2), err_pds(int_len_dim /2)
 
-  integer              :: i, j, reb_dim
+  integer              :: i, j, reb_dim, norm_type
   double precision, allocatable :: pds_int(:,:), pds2(:)
   character (len = 200):: name_base_2
   logical              :: yes_no
-  
-  if(.not. allocated(pds_int)) allocate(pds_int(int_number, int_len_dim/2))
-  do i = 1, int_number
-     call periodogram_frac_rms(lc_int(i,:), pds_int(i, :), int_len_dim)
-  enddo
 
+
+  write(*,*) '    Choose the PDS normalisation:'
+  write(*,*) '    (1) rms-squared  '
+  write(*,*) '    (2) absolute rms '
+  write(*,*) '    (3) Leahy  '
+  write(*,*)
+  read (*,*) norm_type 
+  
+
+  if(.not. allocated(pds_int)) allocate(pds_int(int_number, int_len_dim/2))
+
+  select case(norm_type)
+     case (1)
+        ! write(*,*) '   rms-squared'
+        do i = 1, int_number
+           call periodogram_frac_rms(lc_int(i,:), pds_int(i, :), dt, int_len_dim)
+        enddo
+     case (2)
+        ! write(*,*) '   Absolute rms'
+        do i = 1, int_number
+           call periodogram(lc_int(i,:), pds_int(i, :), dt, int_len_dim)
+        enddo
+     case (3)
+        ! write(*,*) '   Leahy'
+        do i = 1, int_number
+           call   periodogram_leahy(lc_int(i,:), pds_int(i, :), int_len_dim)
+        enddo
+     case default
+        write(*,*) '   No valid normalisation. Exit...'
+        stop
+     end select
+  
+
+  
   if(.not. allocated(pds2)) allocate(pds2(int_len_dim/2))
   pds  = 0.0
   pds2 = 0.0
@@ -77,7 +106,9 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
          write(71, *) 'la y Power [rms\u2]'
          write(71, *) 't off'
          close(71)
-         
+
+      else
+         go to 111
       endif
 
       if (yes_no('   Are you satified with the rebin?')) then
@@ -87,9 +118,21 @@ subroutine make_PDS(freq, lc_int, int_number, int_len_dim, pds, err_pds)
 
       
 !--------------- Print final statements ---------------
+      ! write(*,*)
+      ! write(*,*) '   The normalisation of the PDS is rms-squared (see Uttley et al 2014 Eq.3)'
+111   continue
       write(*,*)
-      write(*,*) '   The normalisation of the PDS is rms-squared (see Uttley et al 2014 Eq.3)'
-      write(*,*)
+  ! select case(norm_type)
+  !    case (1)
+  !       write(*,*) '   The normalisation is rms-squared'
+  !    case (2)
+  !       write(*,*) '   The normalisation is absolute rms'
+  !    case (3)
+  !       write(*,*) '   The normalisation is leahy'
+  !    case default
+  !       write(*,*) '   No valid normalisation.'
+  !    end select
+
       write(*,*) '   Press Enter to continue'
       read(*,*)
       write(*,*)

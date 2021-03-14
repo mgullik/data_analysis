@@ -1,9 +1,9 @@
-subroutine make_PDS_FPMA_B(freq, lc_intA, lc_intB, int_number, int_len_dim, pds, err_pds)
+subroutine make_PDS_FPMA_B(freq, lc_intA, lc_intB, int_number, dt, int_len_dim, pds, err_pds)
   use rebin
   implicit none
 
   integer, intent(IN)  :: int_number, int_len_dim
-  double precision, intent(IN)  :: lc_intA(int_number, int_len_dim),&
+  double precision, intent(IN)  :: dt, lc_intA(int_number, int_len_dim),&
                                    lc_intB(int_number, int_len_dim), &
                                    freq(int_len_dim /2)
   double precision, intent(OUT) :: pds(int_len_dim /2), &
@@ -18,8 +18,8 @@ subroutine make_PDS_FPMA_B(freq, lc_intA, lc_intB, int_number, int_len_dim, pds,
   if(.not. allocated(pds_intA)) allocate(pds_intA(int_number, int_len_dim/2))
   if(.not. allocated(pds_intB)) allocate(pds_intB(int_number, int_len_dim/2))
   do i = 1, int_number
-     call periodogram_frac_rms(lc_intA(i,:), pds_intA(i, :), int_len_dim)
-     call periodogram_frac_rms(lc_intB(i,:), pds_intB(i, :), int_len_dim)
+     call periodogram_frac_rms(lc_intA(i,:), pds_intA(i, :), dt, int_len_dim)
+     call periodogram_frac_rms(lc_intB(i,:), pds_intB(i, :), dt, int_len_dim)
   enddo
 
   if(.not. allocated(pds2)) allocate(pds2(int_len_dim/2))

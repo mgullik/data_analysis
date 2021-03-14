@@ -59,12 +59,12 @@ program cross
           ! call   periodogram(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
 
 
-          call ncperiodogram_frac_rms(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum  
-          call   periodogram_frac_rms(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
-          call   periodogram_frac_rms(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
-          ! call ncperiodogram_no_norm(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), int_len_dim) !Cross spectrum 
-          ! call   periodogram_no_norm(lc_freq1(i, :), pw_freq1(i, :), int_len_dim)
-          ! call   periodogram_no_norm(lc_freq2(i, :), pw_freq2(i, :), int_len_dim)
+          call ncperiodogram_frac_rms(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), dt, int_len_dim) !Cross spectrum  
+          call   periodogram_frac_rms(lc_freq1(i, :), pw_freq1(i, :), dt, int_len_dim)
+          call   periodogram_frac_rms(lc_freq2(i, :), pw_freq2(i, :), dt, int_len_dim)
+          ! call ncperiodogram_no_norm(lc_freq2(i, :), lc_freq1(i, :) , rc_freq(i, :), ic_freq(i, :), dt, int_len_dim) !Cross spectrum 
+          ! call   periodogram_no_norm(lc_freq1(i, :), pw_freq1(i, :), dt, int_len_dim)
+          ! call   periodogram_no_norm(lc_freq2(i, :), pw_freq2(i, :), dt, int_len_dim)
          
           ! write(*,*) 'FFT done of interval ', i 
        else

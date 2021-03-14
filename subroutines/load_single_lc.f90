@@ -2,7 +2,7 @@ subroutine load_single_lc(filename)
   use dyn_lc
   implicit none 
 
-  character (len=200)   :: filename
+  character (len=500)   :: filename
 
     call extract_lc(filename)
     

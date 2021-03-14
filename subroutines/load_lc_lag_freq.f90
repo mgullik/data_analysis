@@ -4,7 +4,7 @@ subroutine load_lc_lag_freq(filename1, filename2)
   implicit none 
 
   integer               :: i, j
-  character (len=200)   :: filename1, filename2
+  character (len=500)   :: filename1, filename2
 
   
   ! call set_seed(seed)

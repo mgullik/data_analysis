@@ -11,7 +11,7 @@ subroutine make_PDS_ref()
   
   if (.not. allocated(pw_ref_int)) allocate(pw_ref_int(int_number, int_len_dim / 2))
   do i = 1, int_number
-     call periodogram_frac_rms(lc_ref(i,:), pw_ref_int(i, :), int_len_dim)
+     call periodogram_frac_rms(lc_ref(i,:), pw_ref_int(i, :), dt, int_len_dim)
   enddo
 
 !Declared in the modulae file
