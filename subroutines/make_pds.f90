@@ -36,7 +36,7 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
      case (3)
         ! write(*,*) '   Leahy'
         do i = 1, int_number
-           call   periodogram_leahy(lc_int(i,:), pds_int(i, :), int_len_dim)
+           call   periodogram_leahy(lc_int(i,:), pds_int(i, :), dt, int_len_dim)
         enddo
      case default
         write(*,*) '   No valid normalisation. Exit...'
@@ -66,7 +66,16 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
   
   if (yes_no('   Do you want to save the PDS of the light curve?')) then
      
-      name_base_2 = 'PDS.qdp'  
+      select case(norm_type)
+      case (1)
+         name_base_2 = 'PDS_rms2.qdp'  
+      case (2) 
+         name_base_2 = 'PDS_abs_rms.qdp'  
+      case (3)
+         name_base_2 = 'PDS_leahy.qdp'  
+      case default
+         write(*,*) '   No valid normalisation.'
+      end select
       write(*,*) '   The name the PDS file is ', trim(name_base_2)
       open(71, file = trim(name_base_2))
       write(71, *) 'skip on'
@@ -79,8 +88,17 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
       write(71, *) 'scr white'
       write(71, *) 'lw 5'
       write(71, *) 'la x Frequency [Hz]'
-      write(71, *) 'la y Power [rms\u2]'
       write(71, *) 't off'
+      select case(norm_type)
+      case (1)
+         write(71, *) 'la y Power [rms\u2\d]'
+      case (2) 
+         write(71, *) 'la y Power [abs rms]'
+      case (3)
+         write(71, *) 'la y Power [Leahy]'
+      case default
+         write(*,*) '   No valid normalisation.'
+      end select
 
       close(71)
 
@@ -89,13 +107,21 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
       if (yes_no('   Do you want to rebin the PDS?')) then
          ! If(.not. allocated(Reb_Freq) ) allocate(Reb_freq (int_len_dim /2))
          call rebin_PDS(freq, pds_int, int_number, int_len_dim, reb_dim)
-         name_base_2 = 'PDS_reb.qdp'  
+         select case(norm_type)
+         case (1)
+            name_base_2 = 'PDS_reb_rms2.qdp'  
+         case (2) 
+            name_base_2 = 'PDS_reb_abs_rms.qdp'  
+         case (3)
+            name_base_2 = 'PDS_reb_leahy.qdp'  
+         case default
+            write(*,*) '   No valid normalisation.'
+         end select
          write(*,*) '   The name the rebinned PDS is ', trim(name_base_2)
          open(71, file = trim(name_base_2))
          write(71, *) 'skip on'
          write(71, *) 'read serr 1 2'
-         do j = 1, reb_dim - 1
-            
+         do j = 1, reb_dim - 1            
             write(71, *) (reb_freq(j + 1) + reb_freq(j)) * 0.5 ,(reb_freq(j + 1) - reb_freq(j)) * 0.5, reb_pds(j), reb_err_pds(j)  
          enddo
          write(71, *) 'no no'
@@ -103,8 +129,18 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
          write(71, *) 'scr white'
          write(71, *) 'lw 5'
          write(71, *) 'la x Frequency [Hz]'
-         write(71, *) 'la y Power [rms\u2]'
          write(71, *) 't off'
+         select case(norm_type)
+         case (1)
+            write(71, *) 'la y Power [rms\u2\d]'
+         case (2) 
+            write(71, *) 'la y Power [abs rms]'
+         case (3)
+            write(71, *) 'la y Power [Leahy]'
+         case default
+            write(*,*) '   No valid normalisation.'
+         end select
+
          close(71)
 
       else

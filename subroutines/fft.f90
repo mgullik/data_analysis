@@ -218,24 +218,29 @@
            pw(j) = (datah(2 * j + 1)**2 + datah(2 * j + 2 )**2) * 2.d0 * dt / (float(dim)) 
         end do
 
-! !Check the Parcival theorem
-!         var = 0.0
-!         do j = 0, dim - 1
-! !           write(*,*) 2 * j + 1, 2 * j + 2
-!            var = var + datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
-!            ! write(111,*) j, datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
-!         enddo
-!         var = var / dim
-!         write(*,*)  'Parcival theorem'
-!         write(*,*)  sum, var
+!Check the Parseval theorem
+        ! sum = 0.d0
+        ! do j = 1, dim
+        !    sum = sum + time_series(j)**2
+        ! enddo        
+        ! var = 0.d0
+        ! do j = 0, dim - 1
+        !    !           write(*,*) 2 * j + 1, 2 * j + 2           
+        !    var = var + datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+        !    ! write(111,*) j, datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+        ! enddo
+        ! var = var / dim
 
-!         var = 0.0
-!         do j = 1, dim / 2 
-!            var = var + pw(j)
-!         enddo
-!         var = (2 * var + datah(1)**2)  / dim
-!         write(*,*)  'Parcival theorem'
-!         write(*,*)  sum, var
+        ! write(*,*)  'Parseval theorem'
+        ! write(*,*)  sum, var
+
+        ! ! var = 0.0
+        ! ! do j = 1, dim / 2 
+        ! !    var = var + pw(j)
+        ! ! enddo
+        ! ! var = (2 * var + datah(1)**2)  / dim
+        ! ! write(*,*)  'Parcival theorem'
+        ! ! write(*,*)  sum, var
         
         if (allocated(datah)) deallocate(datah)
         return
@@ -244,7 +249,7 @@
 
 
 !------------------------------------------------------------------------
-      subroutine periodogram_leahy(ht, pw, dim)
+      subroutine periodogram_leahy(ht, pw, dt, dim)
 ! Calculates power spectrum between the time series ht(int_len_dim)
 ! In leahy normalisation 
 ! Phase is such that +ve lag corresponds to ht lagging st
@@ -252,26 +257,62 @@
         ! use dyn_lc
         implicit none
         integer          , intent(IN)  :: dim
-        double precision , intent(IN)  :: ht(dim)
+        double precision , intent(IN)  :: ht(dim), dt
         double precision , intent(OUT) :: pw(dim / 2)
 
         integer              :: j
-        double precision               :: mean, sum
+        ! double precision               :: sum!, var sum2, par
         double precision ,allocatable  :: datah(:)
 
         if (.not. allocated(datah)) allocate(datah(2 * dim))
-        sum = 0.0
+        ! sum  = 0.0
+        ! sum2 = 0.0
         do j = 1, dim
-           sum = sum + ht(j)
+           ! sum  = sum  + ht(j)
+           ! sum2 = sum2 + ht(j)**2
            datah(2 * j - 1) = ht(j)
            datah(2 * j)   = 0.d0
         end do
         call four1(datah, dim, 1)
+        
         ! write(*,*) ' number of photons: ', sum, datah(1)
-        mean = datah(1) / dim
+
         do j = 1, dim / 2
-           pw(j) = (datah(2 * j + 1)**2 + datah(2 * j + 2 )**2) * 2.d0 / datah(1)  
+           pw(j) = (datah(2 * j + 1)**2 + datah(2 * j + 2 )**2) * 2.d0 * dt / datah(1)
+           ! write(11, *) j, pw(j)
         end do
+        ! write(11, *) 'no no'
+        
+!Check the Parseval theorem
+        ! par = 0.d0
+        ! do j = 0, dim - 1
+        !    !           write(*,*) 2 * j + 1, 2 * j + 2           
+        !    par = par + datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+        !    ! write(111,*) j, datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+        ! enddo
+        ! par = par / dble(dim)
+
+        ! write(*,*)  'Parseval theorem'
+        ! write(*,*)  sum2, par
+
+! !CHECK THE VARIANCE CALCULATION        
+
+! !First the variance from the light curve
+!         var = (sum2 / dble(dim)) - (sum / dble(dim))**2 
+!         write(*,*) 'variance from lc', var
+        
+! !Then variance from the fourier transform 
+!         var = 0.d0
+!         do j = 1, dim - 1
+!            var = var + datah(2 * j + 1)**2 + datah(2 * j + 2 )**2
+!         enddo
+!         var = var / dble(dim)
+!         write(*,*) 'variance from ft', var
+
+!         ! do j = 0, dim - 1
+!         !    write(10,*) j, datah(2 * j + 1)
+!         ! enddo
+!         ! write(10, *) 'no no'
         
         if (allocated(datah)) deallocate(datah)
         return
