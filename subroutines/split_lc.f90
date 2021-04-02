@@ -112,7 +112,7 @@
          do 
 ! !length of the intervals
             write(*,*) '   Enter the length of the interval in steps: '
-            write(*,'(A, F6.4, A)') '      !! Remember that dt is ', dt, ' s'
+            write(*,'(A, F10.4, A)') '      !! Remember that dt is ', dt, ' s'
             read(*,*) int_len_dim
             write(*,*)
             

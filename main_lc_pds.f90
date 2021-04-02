@@ -13,6 +13,7 @@ program ls_to_pds
   ! filename = '/Users/gullo/Work/BHB_project/CygX1_Ole/sinusoid_gaps.fits'
   ! filename = '/Users/gullo/Work/StrayCats/maxij1535/80302312002/products/nu80302312002A01_full_FoV_3to80_01s_sr.lc'
   ! filename = '/Users/gullo/Work/StrayCats/maxij1535/80302312002/products/nu80302312002B01_full_FoV_3to80_01s_sr.lc'
+  ! filename = '/Users/gullo/Work/BHB_project/Gx339/2021_outburst/spec/nu80302304005_srcB_10to20_sr.lc'
 
   write(*,*) '-------------------------------------------------' 
   write(*,*) '    CALCULATES THE PDS OF A GIVEN LIGHT CURVE    '

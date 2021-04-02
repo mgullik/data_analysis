@@ -29,12 +29,12 @@
       readwrite = 0  !file access mode: readonly = 0 , read and write = 1
 ! Get an unused Logical Unit Number to use to open the FITS file.
       call ftgiou(unit,status)
-      write(*,*) status 
+      ! write(*,*) status 
       
 ! Open the FITS file
       call ftopen(unit,filename,readwrite,blocksize,status)
      ! call ftnopn(unit,filename,readwrite,status)  !thisi is used with the extension in the name (e.g. namefile.fits+2)
-      write(*,*) status 
+      ! write(*,*) status 
       
       call ftgerr(status,error_description)
       if (status .ne. 0) then
@@ -44,7 +44,7 @@
       endif
 
       write(*,*) '------------------------------------------'
-      write(*,*) '   Extraction of the light curve', trim(filename)
+      write(*,*) '   Extraction of the light curve: ', trim(filename)
       write(*,*) 
       write(*,*) '   Check TIME, RATE, and GTI'
       

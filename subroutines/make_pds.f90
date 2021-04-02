@@ -152,6 +152,31 @@ subroutine make_PDS(freq, lc_int, int_number, dt, int_len_dim, pds, err_pds)
          goto 666
       endif
 
+      if (yes_no('   Do you want to create xspec file of the rebin PDS?')) then
+         select case(norm_type)
+         case (1)
+            name_base_2 = 'PDS_reb_rms2_xspec.dat'  
+         case (2) 
+            name_base_2 = 'PDS_reb_abs_rms_xspec.dat'  
+         case (3)
+            name_base_2 = 'PDS_reb_leahy_xspec.dat'  
+         case default
+            write(*,*) '   No valid normalisation.'
+         end select
+
+         open(11, file = trim(name_base_2))
+         ! write(11, *) '0.1 0.3 0.01 0.01 '
+         do j = 1, reb_dim - 1            
+            write(11, *) reb_freq(j), reb_freq(j + 1), (reb_freq(j + 1) - reb_freq(j))* reb_pds(j), (reb_freq(j + 1) - reb_freq(j)) * reb_err_pds(j)  
+         enddo
+         ! write(11, *)  l_bin(k), r_bin(k),  (r_bin(k) - l_bin(k)) * lag_freq(jj, k), (r_bin(k) - l_bin(k)) *  error_Aform_lag(jj, k)
+      ! write(11, *) '10.0 20. 0.01 0.01 '
+         close(11)
+         write(*,*) '   The name the xspec PDS is ', trim(name_base_2)
+         write(*,*) '   Use flx2xsp to create the pha files from the PDS file'
+
+         
+      endif
       
 !--------------- Print final statements ---------------
       ! write(*,*)
