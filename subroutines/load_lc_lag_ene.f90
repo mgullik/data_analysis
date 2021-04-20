@@ -5,27 +5,30 @@ subroutine load_lc_lag_ene()
   integer              :: i, j, k
   double precision     :: en_units
   character (len = 500)  :: name_path,  name_base, filename, &
-       filename_en_bin, name_extension, filename_ref
+       filename_en_bin, name_extension, filename_ref, prefix_name
   logical              :: yes_no
 
   integer              :: file_line_num
   integer, allocatable :: l_bin(:), r_bin(:)
   
       print *, ' '
-      print *, '   Name of the path!'
-      name_path = '/Users/gullo/Work/BHB_project/CygX1_Ole/energy_resolved_lcs'
-      write(*,*) trim(name_path)
+      ! print *, '   Write the name of the path (end with "/"):'
+      ! read(*,'(A)') name_path
+      ! write(*,*) 'Path read ', trim(name_path)
+      name_path = '/Users/gullo/Work/AGN_project/ark564/0670130201/lc_lag_en/'
       
       print *, ' '
-      print *, '   Name of the channel/energy bin'
-      filename_en_bin = '/Users/gullo/Work/BHB_project/CygX1_Ole/bins.txt'
-      write(*,*) trim(filename_en_bin)
-      print *, ' '
+      ! print *, '   Write the name of the channel/energy bin'
+      ! read(*,'(A)') filename_en_bin
+      ! write(*,*) trim(filename_en_bin)
+      ! print *, ' '
+      filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/0670130201/binning_en.txt'
       
-      if (yes_no('   Are the energies in the bins.txt file expressed in eV? ')) then
+      if (yes_no('   Are the energies expressed in eV? ')) then
          en_units = 1000.d0
       else
          write(*,*) '   Write the number the energies has to be divided to obtain keV'
+         read(*,*) en_units
       end if
 
       print *, ' '
@@ -47,7 +50,8 @@ subroutine load_lc_lag_ene()
       close(55)
       print *, '   Number of energies in the spectrum: ', en_num
       print *, ' '
-      write(*, '(A, F6.3, A, F6.3)') '   Energy boundaries in keV: ', (l_en_bin(1) + r_en_bin(1)) * 0.5d0 ,' - ', (l_en_bin(en_num) + r_en_bin(en_num)) * 0.5d0  
+      ! write(*, '(A, F6.3, A, F6.3)') '   Energy boundaries in keV: ', (l_en_bin(1) + r_en_bin(1)) * 0.5d0 ,' - ', (l_en_bin(en_num) + r_en_bin(en_num)) * 0.5d0  
+      write(*, '(A, F6.3, A, F6.3)') '   Energy boundaries in keV: ', real(l_en_bin(1)),' - ',  real(r_en_bin(en_num))  
       print *, ' '
 
       if (.not. allocated(ave_rate_en) ) allocate(ave_rate_en(en_num))
@@ -56,14 +60,26 @@ subroutine load_lc_lag_ene()
 
 !GET ALL THE LIGHT CURVES  
 
-      write(name_base, '(A, A)')  trim(name_path), '/ni2636010101_0.01s_'  
-      ! write(*,*)  name_base
-      write(name_extension, '(A)') 'eV.lc'
+      ! write(*,*) '   Write the prefix of the light curve filename:'
+      ! read(*,'(A)') prefix_name
+      ! write(*,*)  trim(prefix_name)
+!Aternatively, comment the 3 lines above and use this one below       
+      prefix_name = 'PN_lccorr_en'
+      
+      write(name_base, '(A, A)')  trim(name_path), trim(prefix_name)
 
+      ! write(*,*) '   Write the extension of the light curve filename:'
+      ! read(*,'(A)') name_extension
+      ! write(*,*)  trim(name_extension)
+!Aternatively, comment the 3 lines above and use this one below       
+      name_extension = '_lag_en.lc'
+
+      ! en_num = 2
       do k = 1, en_num
          
 !Work out the name of the light curve 
-         write(filename, '(A, I0, A, I0, A)') trim(name_base), l_bin(k), 'eV-', r_bin(k), trim(name_extension)
+         write(filename, '(A, I0, A, I0, A)') trim(name_base), l_bin(k), '-', r_bin(k), trim(name_extension)
+         write(*,*) trim(filename)
          write(*,*)
          call extract_lc(filename)
 
@@ -75,6 +91,7 @@ subroutine load_lc_lag_ene()
             stop
          endif
 
+         
          if (.not. allocated(lc_en)   ) allocate(lc_en   (int_number, int_len_dim, en_num))
          ! if (.not. allocated(bkg_en)  ) allocate(bkg_en  (int_number, int_len_dim, en_num))
 

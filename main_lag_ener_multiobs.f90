@@ -8,32 +8,34 @@ program cross
   double precision, parameter   :: pi = acos(-1.0)
   integer              :: i, j, k, kk, jj
   integer, allocatable :: num_freq_bins(:)
-  double precision , allocatable :: rc_en(:,:,:), ic_en(:,:,:), &
+  double precision, allocatable :: rc_en(:,:,:), ic_en(:,:,:), &
                           pw_en(:,:,:), pw_ref_en(:,:,:), &
                           lc_ref_cross(:,:,:)
 
-  double precision , allocatable :: rc_avefq_en(:,:),ic_avefq_en(:,:),&
+  double precision, allocatable :: rc_avefq_en(:,:),ic_avefq_en(:,:),&
                           rc2_avefq_en(:,:), ic2_avefq_en(:,:), &
                           rc_ic_avefq_en(:,:), pw_avefq_en(:,:), &
                           pw_avefq_en_ref(:,:)
-  double precision , allocatable :: var_rc(:,:), var_ic(:,:), deriv_rc(:,:), &
+  double precision, allocatable :: var_rc(:,:), var_ic(:,:), deriv_rc(:,:), &
                           deriv_ic(:,:), covariance(:,:), &
                           err_std_rc(:,:), err_std_ic(:,:), &
                           coher2_en(:,:), err_Aform_rc_ic(:,:), &
                           err_Aform_lag(:,:), err_prop_lag(:,:), &
                           err_cohe_lag(:,:), lag_en(:,:)
 !P_noise
-  double precision               :: freq_limit, bias2
-  double precision               :: get_p_noise_pw  !function
-  double precision , allocatable :: P_noise_ext(:), P_noise_ext_ref(:), &
+  double precision              :: freq_limit, bias2
+  double precision              :: get_p_noise_pw  !function
+  double precision, allocatable :: P_noise_ext(:), P_noise_ext_ref(:), &
                           pw_aveint(:), pw_aveint_ref(:)
 
+!NOT power of 2 segments
+  double precision, allocatable :: re_lc(:), im_lc(:), re_ref(:), im_ref(:)
   
 !******************************************************************
     
 !GET LIGHT CURVEs 
 
-  call load_lc_lag_ene()
+  call load_lc_lag_ene_obs()
 
 !Arrays to save the fourier trasform analysis for every energy       
       if(.not. allocated(rc_en)) allocate(rc_en(int_number, int_len_dim / 2, en_num))
@@ -75,7 +77,13 @@ program cross
             enddo
 
          endif
-         
+
+         if (.not. check_power2) then
+            allocate(re_lc (int_len_dim / 2))
+            allocate(im_lc (int_len_dim / 2))
+            allocate(re_ref(int_len_dim / 2))
+            allocate(im_ref(int_len_dim / 2))
+         endif
             
          do k = 1, en_num             
             do i = 1, int_number
@@ -94,34 +102,39 @@ program cross
                   
                ! write(*,*) 'FFT done', i
             else
-               write(*,*) '   The length of the intervals is not a power of 2 ', int_len_dim
-               stop 
+               ! write(*,*) '   The length of the intervals is not a power of 2 ', int_len_dim
                
-! !Calculate the Fourier transform of the light curves and reference bands
-!                call FT_not_fast(lc_en(i, :, k), re_lc, im_lc, int_len_dim)
-!                call FT_not_fast(lc_ref_cross, re_ref, im_ref, int_len_dim)
-
-! !Calculate Power spectra and cross spectrum of light curves and ref band
-!                do jj = 1, int_len_dim / 2    
-!                   rc_en    (i, jj, k) = (re_lc(jj) * re_ref(jj)) + (im_lc(jj) * im_ref(jj))
-!                   ic_en    (i, jj, k) = (im_lc(jj) * re_ref(jj)) - (re_lc(jj) * im_ref(jj))
-!                   pw_en    (i, jj, k) = (re_lc(jj) * re_lc(jj)) + (im_lc(jj) * im_lc(jj)) 
-!                   pw_ref_en(i, jj, k) = (re_ref(jj) * re_ref(jj)) + (im_ref(jj) * im_ref(jj))  
-!                enddo               
-!                write(*,*) 'Slow Fourier transform done', k, i  
+!Calculate the Fourier transform of the light curves and reference bands
+               call FT_not_fast(lc_en(i, :, k), re_lc, im_lc, int_len_dim)
+               call FT_not_fast(lc_ref_cross(i, :, k), re_ref, im_ref, int_len_dim)
+               
+!Calculate Power spectra and cross spectrum of light curves and ref band
+               do jj = 1, int_len_dim / 2    
+                  rc_en    (i, jj, k) = (re_lc(jj) * re_ref(jj)) + (im_lc(jj) * im_ref(jj))
+                  ic_en    (i, jj, k) = (im_lc(jj) * re_ref(jj)) - (re_lc(jj) * im_ref(jj))
+                  pw_en    (i, jj, k) = (re_lc(jj) * re_lc(jj)) + (im_lc(jj) * im_lc(jj)) 
+                  pw_ref_en(i, jj, k) = (re_ref(jj) * re_ref(jj)) + (im_ref(jj) * im_ref(jj))  
+               enddo               
+               ! write(*,*) 'Slow Fourier transform done', k, i  
 
             endif
 
          enddo ! loop over intervarls (int_number)
          
-         write(*,'(A, I3)') '   Finished to calculate the cross spectrum between the reference band and the energy bin number ', k
+         write(*,'(A, F6.2,A,F6.2,A)') '   Finished to calculate the cross spectrum between the reference band and the energy band between: ', l_en_bin(k), ' - ', r_en_bin(k), ' keV' 
       enddo !loop over enery bins (en_num)
+      deallocate(re_lc )
+      deallocate(im_lc )
+      deallocate(re_ref)
+      deallocate(im_ref)
 
-      write(*,*) '   Start error calculation'
+      write(*,*) '   Press Enter to continue'
+      read(*,*)
+
       write(*,*)
-      ! write(*,*) '   Press Enter to continue'
-      ! read(*,*)
-
+      write(*,*) '   Start lag calculation'
+      write(*,*)
+      
 !Compute the poisson noise for every pw of each energy band and ref band  
       if( .not. allocated(P_noise_ext    )) allocate(P_noise_ext    (en_num))
       if( .not. allocated(P_noise_ext_ref)) allocate(P_noise_ext_ref(en_num))
@@ -246,7 +259,7 @@ program cross
          bias2 = 0.d0 
       endif
 
-      ! bias2 = 0.d0 
+      bias2 = 0.d0 
 
 !Adam's formula real and imaginary part
       err_Aform_rc_ic(jj, k) = sqrt (pw_avefq_en_ref(jj, k) * (pw_avefq_en(jj, k) - ( (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) ) ) / (2.d0 * real(num_freq_bins(jj) * int_number) ) )

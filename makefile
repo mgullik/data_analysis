@@ -1,5 +1,6 @@
 main_freq = main_lag_freq.f90
-main_ener = main_lag_ener.f90
+main_ener = main_lag_ener_multiobs2.f90
+# main_ener = main_lag_ener.f90
 lc2pds    = main_lc_pds.f90
 lc2pds_nu = main_lc_pds_nustar.f90
 

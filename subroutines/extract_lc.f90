@@ -13,9 +13,10 @@
                              ,nrow, nrow_GTI, ncol, ncol_GTI, colnum & 
                              ,felem, nelem, datacode, repeat, width, frow
       integer             :: colnum_f
-      double precision    :: dt_f, dt_temp
+      double precision    :: get_keyword_double, dt_temp
       real                :: nullval
-      double precision    :: first_time_bin, first_time_bin_GTI 
+
+      double precision    :: first_time_bin, first_time_bin_GTI
 
       real  , dimension(:), allocatable :: time_e, rate_e, bkg_e, start_GTI_e, end_GTI_e, err_rate_e
       double precision, dimension(:), allocatable :: time_d, rate_d, bkg_d, start_GTI_d, end_GTI_d, err_rate_d
@@ -62,7 +63,29 @@
       call ftgncl(unit,ncol,status)
 !      write(*,*) "number of rows", nrow
 
+! extract the dt from fits file
+      keyword = 'TIMEDEL'
+      dt_temp = dt
+      dt = get_keyword_double(unit,keyword,status)
+!      write(*,*) 'dt', dt
 
+! Check if the dt is equal to the previous one, besides the first time the dt is calculated (starting dt=-1)
+      if(dt_temp .ne. -1) then 
+         if (dt .ne. dt_temp) then
+            write(*,*) '   dt of this new light curve is different from the previous one'
+            write(*,*) '   to make the cross spectrum you need to have the same dt. EXIT...'
+            stop
+         endif
+      endif
+
+
+! extract the telescope starting time from fits
+      keyword = 'TSTART'
+      starting_telescope_time = get_keyword_double(unit,keyword,status)
+!      write(*,*) 'dt', dt
+
+
+      
 !**************************************************************!      
 ! Let's get the column number for a particolar name with colnum_f (function)
       col_name_temp = '*TIME*'
@@ -191,61 +214,78 @@
       !    end if
       ! endif
 !**************************************************************!      
+      
+!Allocation of the general array
+      if(.not. allocated(lc) ) then 
+         allocate(lc (nrow))
+      else 
+         if (nrow .ne. dim_lc) then 
+            write(*,*) '   ATTENTION!! The light curves do not have the same length!'
+            stop 
+         endif
+      endif
+      
+      ! if(.not. allocated(bkg)  ) allocate(bkg  (nrow))
 
-!CONVERSION FROM REAL TO DOUBLE PRECISION OF TIME
+!Set the dimension of the lc and write the lc, time, and bkg in the common arrays
+      dim_lc = nrow
+
+!CONVERSION FROM REAL TO DOUBLE PRECISION OF TIME AND 
       if (allocated(time_e)) then
-         if(.not. allocated(time_d)) allocate(time_d(nrow))
+         if(.not. allocated(time)  ) allocate(time(dim_lc))
+         ! if(.not. allocated(time_tel)) allocate(time_tel(dim_lc))
          first_time_bin = dble(time_e(1)) 
-         do i = 1, nrow
-            time_d(i) = dble(time_e(i)) - first_time_bin
+         do i = 1, dim_lc
+            time(i) = dble(time_e(i)) - first_time_bin
+            ! time_tel(i) = dble(time_e(i))
          enddo
          deallocate(time_e)
       else
+         if(.not. allocated(time)  ) allocate(time(dim_lc))
+         ! if(.not. allocated(time_tel)) allocate(time_tel(nrow))
          first_time_bin = time_d(1)
          do i = 1, nrow
-            time_d(i) = time_d(i) - first_time_bin
+            time(i) = time_d(i) - first_time_bin
+            ! time_tel(i) = time_d(i)
          enddo         
+         deallocate(time_d)
       endif
 
-!CONVERSION FROM REAL TO DOUBLE PRECISION OF RATE_E
+!CONVERSION FROM REAL TO DOUBLE PRECISION OF RATE_E AND STORE INTO THE LC ARRAY
       if (allocated(rate_e)) then
-         if(.not. allocated(rate_d)) allocate(rate_d(nrow))
-         do i = 1, nrow
-            rate_d(i) = dble(rate_e(i))
+         if(.not. allocated(lc)) allocate(lc(dim_lc))
+         do i = 1, dim_lc
+            lc(i) = dble(rate_e(i))
          enddo
          deallocate(rate_e)
+      else
+         if(.not. allocated(lc)) allocate(lc(dim_lc))
+         do i = 1, dim_lc
+            lc(i) = rate_d(i)
+         enddo         
+         deallocate(rate_d)
       endif
 
       if (allocated(err_rate_e)) then
-         if(.not. allocated(err_rate_d)) allocate(err_rate_d(nrow))
-         do i = 1, nrow
-            err_rate_d(i) = dble(err_rate_e(i))
+         if(.not. allocated(err_rate)) allocate(err_rate(dim_lc))
+         do i = 1, dim_lc
+            err_rate(i) = dble(err_rate_e(i))
          enddo
          deallocate(err_rate_e)
+      else
+         if(.not. allocated(err_rate)) allocate(err_rate(dim_lc))
+         do i = 1, dim_lc
+            err_rate(i) = err_rate_d(i)
+         enddo
       endif
 
             
-! extract the dt from fits file with dt_f (function)
-      keyword = 'TIMEDEL'
-      dt_temp = dt
-      dt = dt_f(unit,keyword,status)
-!      write(*,*) 'dt', dt
-
-! Check if the dt is equal to the previous one, besides the first time the dt is calculated (starting dt=-1)
-      if(dt_temp .ne. -1) then 
-         if (dt .ne. dt_temp) then
-            write(*,*) '   dt of this new light curve is different from the previous one'
-            write(*,*) '   to make the cross spectrum you need to have the same dt. EXIT...'
-            stop
-         endif
-      endif
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
       ! ! GET THE GTI ARRAY
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 !Let's move in the correct HDU (with the name in hdu_name)      
-      hdu_name = 'GTI'
+      hdu_name = 'SRC_GTIS'
       call hdu_move(unit, hdu_name,status)
       if (status .eq. 301) then
          if (yes_no('   Do you want to consider the full light curve length as GTI')) then
@@ -359,28 +399,37 @@
 !CONVERSION FROM REAL TO DOUBLE PRECISION         
          if (allocated(start_GTI_e)) then
             if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+            ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
             first_time_bin_GTI = dble(start_GTI_e(1)) 
             do i = 1, nrow_GTI
                start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
+               ! start_GTI_tel_time(i) =  dble(start_GTI_e(i))  
             enddo
+            
             deallocate(start_GTI_e)
          else
+            ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
             first_time_bin_GTI = start_GTI_d(1) 
             do i = 1, nrow_GTI
                start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
+               ! start_GTI_tel_time(i) =  start_GTI_d(i)  
             enddo
 
          endif
 
          if (allocated(end_GTI_e)) then
             if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+            ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
             do i = 1, nrow_GTI
                end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
+               ! end_GTI_tel_time(i) = dble(end_GTI_e(i))
             enddo
             deallocate(end_GTI_e)
          else
+            ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
             do i = 1, nrow_GTI
                end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
+               ! end_GTI_tel_time(i) = end_GTI_d(i) 
             enddo
          endif
    
@@ -411,41 +460,6 @@
       ! write(*,*) 'First time bin of the GTI', first_time_bin
       ! write(*,*)
 
-      
-!Allocation of the general array
-      if(.not. allocated(lc) ) then 
-         allocate(lc (nrow))
-      else 
-         if (nrow .ne. dim_lc) then 
-            write(*,*) '   ATTENTION!! The light curves do not have the same length!'
-            stop 
-         endif
-      endif
-      
-      ! if(.not. allocated(bkg)  ) allocate(bkg  (nrow))
-
-!Set the dimension of the lc and write the lc, time, and bkg in the common arrays
-      dim_lc = nrow
-
-      if (allocated(time_d)) then
-         if(.not. allocated(time) ) allocate(time (nrow))
-         do i = 1, nrow
-            time(i) = time_d(i)
-         enddo
-      endif
-
-      if (allocated(rate_d)) then
-         do i = 1, nrow
-            lc(i)   = rate_d(i)
-         enddo
-      endif
-
-      if (allocated(err_rate_d)) then
-         if(.not. allocated(err_rate)) allocate(err_rate(nrow))
-         do i = 1, nrow
-            err_rate(i)  = err_rate_d(i)
-         enddo
-      endif
       
 !Fill the GTI 
 !It is complicated because we have to distinguish between the first call and the others

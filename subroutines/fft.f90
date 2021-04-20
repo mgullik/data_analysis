@@ -734,12 +734,12 @@ subroutine cross_FT(lc1, lc2, rc, ic, NN, dt)
 ! re1, im1, re2, im2 are the real and imaginary part to calculare the 
 ! Fourier transform 
   implicit none 
-  integer, intent(IN)    :: NN
-  real   , intent(IN)    :: lc1(NN), lc2(NN), dt
-  real   , intent(OUT)   :: rc(NN / 2), ic(NN / 2)
+  integer         , intent(IN)    :: NN
+  double precision, intent(IN)    :: lc1(NN), lc2(NN), dt
+  double precision, intent(OUT)   :: rc(NN / 2), ic(NN / 2)
   
-  integer                :: i
-  real   , allocatable   :: re1(:), im1(:), re2(:), im2(:)
+  integer                         :: i
+  double precision, allocatable   :: re1(:), im1(:), re2(:), im2(:)
 
   allocate (re1(NN / 2))
   allocate (im1(NN / 2))
@@ -763,12 +763,12 @@ subroutine power_FT(lc1, pw, NN, dt)
 ! This subroutine calculates the power-spectrum of lc1
 ! re1, im1 are the real and imaginary part to calculare the Fourier transform 
   implicit none 
-  integer, intent(IN)    :: NN
-  real   , intent(IN)    :: lc1(NN), dt 
-  real   , intent(OUT)   :: pw(NN / 2)
+  integer         , intent(IN)    :: NN
+  double precision, intent(IN)    :: lc1(NN), dt 
+  double precision, intent(OUT)   :: pw(NN / 2)
   
-  integer                :: i
-  real   , allocatable   :: re1(:), im1(:)
+  integer                         :: i
+  double precision, allocatable   :: re1(:), im1(:)
 
   allocate (re1(NN / 2))
   allocate (im1(NN / 2))
@@ -790,26 +790,23 @@ subroutine FT_not_fast(time_series, re, im, NN)
 ! re and im don't store the average of the light curve, so they have NN/2
 ! The first frequency is nu = 1/(NN*dt) the last is the Nyquist frequency nuNy = 1/(2*dt)
   implicit none 
-  integer, intent(IN)    :: NN
-  real   , intent(IN)    :: time_series(NN)
-  real   , intent(INOUT) :: re(NN / 2), im(NN / 2)
+  integer         , intent(IN)    :: NN
+  double precision, intent(IN)    :: time_series(NN)
+  double precision, intent(INOUT) :: re(NN / 2), im(NN / 2)
   
-  integer                :: n, k
-  real                   :: arg
-  real   , parameter     :: pi = acos(-1.0)
+  integer                         :: n, k
+  double precision                :: arg
+  double precision, parameter     :: pi = acos(-1.0)
   
-
 
   do n = 1, NN / 2  
      re(n) = 0.0 
      im(n) = 0.0 
-     
-     do k = 1, NN 
 
+     do k = 1, NN 
         arg = 2.0 * pi * real(k * n) / real(NN)
         re(n) = re(n) + time_series(k) * cos(arg)
         im(n) = im(n) + time_series(k) * sin(arg)
-
      enddo
      re(n) = re(n) / real(NN)
      im(n) = im(n) / real(NN)
