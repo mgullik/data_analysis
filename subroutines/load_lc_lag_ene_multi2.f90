@@ -16,17 +16,17 @@ subroutine load_lc_lag_ene_obs2()
   double precision, allocatable :: time_obs(:,:,:)
   double precision              :: start_GTI_obs(max_GTI_dim), end_GTI_obs(max_GTI_dim)
 
-  check_merge = .false.
-  obs_num = 8
+  check_merge = .true.
+  obs_num = 1
   
   gti_dim_obs = 1
   
       print *, ' '
-      ! print *, '   Write the name of the channel/energy bin'
-      ! read(*,'(A)') filename_en_bin
-      ! write(*,*) trim(filename_en_bin)
-      ! print *, ' '
-      filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
+      print *, '   Write the name of the channel/energy bin'
+      read(*,'(A)') filename_en_bin
+      write(*,*) trim(filename_en_bin)
+      print *, ' '
+      ! filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
       
       if (yes_no('   Are the energies expressed in eV? ')) then
          en_units = 1000.d0
@@ -71,15 +71,15 @@ subroutine load_lc_lag_ene_obs2()
 !GET ALL THE LIGHT CURVES IN ALL THE OBSERVATIONS
 
       do o = 1, obs_num
-         ! print *, ' '
-         ! print *, '   Write the name of the path (end with "/"):'
-         ! read(*,'(A)') name_path
-         ! write(*,*) 'Path read ', trim(name_path)
+         print *, ' '
+         print *, '   Write the name of the path (end with "/"):'
+         read(*,'(A)') name_path
+         write(*,*) 'Path read ', trim(name_path)
 !Aternatively, comment the 3 lines above and use this one below         
-         write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en/'
-         write(*,*) 'Path is: (enter to continue)'
-         write(*,*) trim(name_path)
-         read(*,*)
+         ! write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en/'
+         ! write(*,*) 'Path is: (enter to continue)'
+         ! write(*,*) trim(name_path)
+         ! read(*,*)
 
          ! write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130801/lc_lag_en/'
          
@@ -95,14 +95,14 @@ subroutine load_lc_lag_ene_obs2()
          ! read(*,'(A)') name_extension
          ! write(*,*)  trim(name_extension)
 !Aternatively, comment the 3 lines above and use this one below       
-         name_extension = '_lag_en.lc'
+         name_extension = '_lag_en2-10.lc'
          
          ! en_num = 1
          do k = 1, en_num
          
 !Work out the name of the light curve 
             write(filename, '(A, I0, A, I0, A)') trim(name_base), l_bin(k), '-', r_bin(k), trim(name_extension)
-            ! write(*,*) trim(filename)
+            write(*,*) trim(filename)
             write(*,*)
             call extract_lc(filename)
 

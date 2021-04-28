@@ -37,9 +37,16 @@
             endif
          enddo
 
+         write(*,*)
+         write(*,*) '   GTI situation of the observation'
+         do i = 1, dim_GTI
+            write(*,'(A,I4,A,F12.2,A)') '   GTI number ', i, ' length ', end_GTI(i) - start_GTI(i), ' sec'
+         enddo
+         write(*,*)
+            
          if (check) then
-            if (1 .eq. 1) then
-            ! if (yes_no('    Do you want to interpolate the light curve gaps?')) then 
+            ! if (1 .eq. 1) then !*** TO RUN AUTOMATICALLY                  
+            if (yes_no('    Do you want to interpolate the light curve gaps?')) then 
 
 ! This is to save the rate before the interpolation 
                if(.not. allocated(temp_array)) allocate(temp_array(dim_lc))
@@ -57,8 +64,9 @@
                   write(*,*)
                   write(*,*) 'After the interpolation the number of gaps is: ', new_dim_GTI - 1
                   write(*,*)
-                  if (1 .ne. 1) then
-                  ! if (yes_no('   Do you want to interpolate differently?')) then
+                  
+                  ! if (1 .ne. 1) then !*** TO RUN AUTOMATICALLY                  
+                  if (yes_no('   Do you want to interpolate differently?')) then
                      lc      = temp_array
                      start_GTI = temp_GTI1
                      end_GTI   = temp_GTI2
@@ -73,7 +81,14 @@
                if(allocated(temp_array)) deallocate(temp_array)
                if(allocated(temp_GTI1) ) deallocate(temp_GTI1)
                if(allocated(temp_GTI2) ) deallocate(temp_GTI2)
-            
+
+               write(*,*)
+               write(*,*) '   GTI situation of the observation aftert the interpolation'
+               do i = 1, dim_GTI
+                  write(*,'(A,I4,A,F12.2,A)') '   GTI number ', i, ' length ', end_GTI(i) - start_GTI(i), ' sec'
+               enddo
+               write(*,*)
+               
 ! RE-SET THE GTI INTERVALS BASED ON THE INTERPOLATION
                allocate(temp_array(new_dim_GTI))
                do i=1, new_dim_GTI
@@ -244,9 +259,9 @@
        write(*,*)
        write(*,*) '   Set the maximum length that you want to interpolate (in sec).'
        write(*,'(A,F6.3)') '   Remember that dt is ', real(dt)
-       ! read(*,*) max_gap_sec
-       max_gap_sec = 10000
-       ! read(*,*) max_gap
+       read(*,*) max_gap_sec
+       ! max_gap_sec = 10000 !*** TO RUN AUTOMATICALLY                  
+
        gap = int(max_gap_sec / dt)
        max_gap = gap
     else
