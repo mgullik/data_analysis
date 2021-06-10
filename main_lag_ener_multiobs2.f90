@@ -132,10 +132,10 @@ program cross
             write(*,*)
          enddo !loop over enery bins (en_num)
 
-         deallocate(re_lc )
-         deallocate(im_lc )
-         deallocate(re_ref)
-         deallocate(im_ref)
+         if(allocated(re_lc )) deallocate(re_lc )
+         if(allocated(im_lc )) deallocate(im_lc )
+         if(allocated(re_ref)) deallocate(re_ref)
+         if(allocated(im_ref)) deallocate(im_ref)
 
       enddo
 

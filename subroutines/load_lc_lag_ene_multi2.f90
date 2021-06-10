@@ -134,7 +134,7 @@ subroutine load_lc_lag_ene_obs2()
             ! if (.not. allocated(bkg_en)  ) allocate(bkg_en  (int_number, int_len_dim, en_num))
 
             do j = 1, int_len_dim_obs(o)
-               do i = 1, int_number
+               do i = 1, int_number_obs(o)
                   lc_en_obs (i, j, k, o) = lc_int(i, j)
                   ! bkg_en(i, j, k) = bkg_int(i, j)
                   ave_rate_en_obs(k, o) = ave_rate_en_obs(k, o) + lc_int(i, j)

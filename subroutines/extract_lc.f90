@@ -475,7 +475,9 @@
             end_GTI  (i) = end_GTI_d(i)
             ! write(*,*) 'GTI', start_GTI_d(i), end_GTI_d(i)
          enddo
-      else 
+         
+      else
+         ! write(*, *) ' check_gap_num, nrow_GTI, dim_GTI', check_gap_num, nrow_GTI, dim_GTI
          if (check_gap_num .ne. nrow_GTI) then 
             write(*,*) '  ATTENTION!! The GTIs are not the same in all the light curves'
             stop 

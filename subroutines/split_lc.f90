@@ -45,9 +45,14 @@
          write(*,*)
             
          if (check) then
-            ! if (1 .eq. 1) then !*** TO RUN AUTOMATICALLY                  
-            if (yes_no('    Do you want to interpolate the light curve gaps?')) then 
-
+            if (verbose_merge) then !*** TO RUN AUTOMATICALLY
+            else
+               goto 101
+            endif
+            if (yes_no('    Do you want to interpolate the light curve gaps?')) then
+                  
+101            continue
+                  
 ! This is to save the rate before the interpolation 
                if(.not. allocated(temp_array)) allocate(temp_array(dim_lc))
                if(.not. allocated(temp_GTI1) ) allocate(temp_GTI1 (dim_GTI))
@@ -65,7 +70,11 @@
                   write(*,*) 'After the interpolation the number of gaps is: ', new_dim_GTI - 1
                   write(*,*)
                   
-                  ! if (1 .ne. 1) then !*** TO RUN AUTOMATICALLY                  
+                  if (verbose_merge) then !*** TO RUN AUTOMATICALLY
+                  else
+                     exit
+                  endif
+                  
                   if (yes_no('   Do you want to interpolate differently?')) then
                      lc      = temp_array
                      start_GTI = temp_GTI1
@@ -130,14 +139,14 @@
 ! !length of the intervals
             write(*,*) '   Enter the length of the interval in steps: '
             write(*,'(A, F10.4, A)') '      !! Remember that dt is ', dt, ' s'
-            if (check_merge) then 
+            if (verbose_merge) then 
                read(*,*) int_len_dim
             else
                int_len_dim = int(tot_time_lc / dt)
-               write(*,*) '    length if the interval is: ',  int_len_dim
+               write(*,*) '    length of the interval is: ',  int_len_dim
             endif
-               write(*,*)
-            
+            write(*,*)
+
 !Compute the split in the light curve and create the split_ind array
             call lc_split_first(check_interval)
             if (check_interval) then 
@@ -146,7 +155,6 @@
                if(.not. allocated(lc_int)  ) allocate(lc_int  (int_number, int_len_dim) )
                if(.not. allocated(time_int)) allocate(time_int(int_number, int_len_dim) )
 
-               
             !Fill the time_int, lc_int and bkg_int which are the light curves separated in intervals
                call lc_split_index_time()
 
@@ -155,6 +163,7 @@
                   write(*,*) '   Precedure without the FFT (it is not a power of 2)'
                   check_power2 = .false.
                else
+               write(*, *) '   Procedure uses FFT'
                   check_power2 = .true.
                endif
                
@@ -205,7 +214,7 @@
          call lc_split_index_time()
       endif
 
-
+      write(*,*) '  Split completed'
      
     end subroutine split_lc
 !---------------------------------------------------------------------!
@@ -259,9 +268,13 @@
        write(*,*)
        write(*,*) '   Set the maximum length that you want to interpolate (in sec).'
        write(*,'(A,F6.3)') '   Remember that dt is ', real(dt)
-       read(*,*) max_gap_sec
-       ! max_gap_sec = 10000 !*** TO RUN AUTOMATICALLY                  
 
+       if (verbose_merge) then 
+          read(*,*) max_gap_sec
+       else
+          max_gap_sec = max_gap_sec_init
+       endif      
+       ! max_gap_sec = 2000 !*** TO RUN AUTOMATICALLY                  
        gap = int(max_gap_sec / dt)
        max_gap = gap
     else
@@ -428,7 +441,7 @@
         check_interval = .false.
      endif
 
-     
+     write(*,*)  'End lc_split_first'
      
    end subroutine lc_split_first
 !---------------------------------------------------------------------!
