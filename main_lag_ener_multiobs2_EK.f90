@@ -1,12 +1,14 @@
 include 'header.h'
 
+!This main is specific to analyse Erin's light curves 
+
 program cross
   use dyn_lc
   use rand_fun
   implicit none 
 
   double precision, parameter   :: pi = acos(-1.0)
-  integer              :: i, j, k, kk, jj, o
+  integer              :: i, j, k, kk, jj, o, en_ind
   integer, allocatable :: num_freq_bins(:)
   double precision, allocatable :: rc_en_obs(:,:,:,:), ic_en_obs(:,:,:,:), &
                           pw_en_obs(:,:,:,:), pw_ref_en_obs(:,:,:,:), &
@@ -36,7 +38,8 @@ program cross
     
 !GET LIGHT CURVEs 
 
-  call load_lc_lag_ene_obs2()
+  ! call load_lc_lag_ene_obs2()
+  call load_lc_lag_ene_obs2_ek()
 
 !Arrays to save the fourier trasform analysis for every energy       
       if(.not. allocated(rc_en_obs)    ) allocate(rc_en_obs    (int_number_max, int_len_dim_max / 2, en_num, obs_num))
@@ -204,6 +207,23 @@ program cross
       call make_freq_intervals_obs()
 
 !-----------------------------------------------------------------------------------------------------
+!Energy rebinning (only factor of 2) and the last 3 energy bins together
+!-----------------------------------------------------------------------------------------------------
+      en_num = (en_num - 1) / 2  ! half of the number of energy bins 
+
+!change the energy bins
+      do k = 1, en_num - 1
+         en_ind = (2 * k) - 1
+         l_en_bin(k) = l_en_bin(en_ind)
+         r_en_bin(k) = r_en_bin(en_ind + 1)
+      enddo
+!Last energy bin
+      k = en_num
+      en_ind = (2 * k) - 1
+      l_en_bin(k) = l_en_bin(en_ind)
+      r_en_bin(k) = r_en_bin(en_ind + 2)
+
+      
       if(.not. allocated(rc_avefq_en    )) allocate(rc_avefq_en    (freq_num, en_num))
       if(.not. allocated(ic_avefq_en    )) allocate(ic_avefq_en    (freq_num, en_num))
       if(.not. allocated(rc2_avefq_en   )) allocate(rc2_avefq_en   (freq_num, en_num))
@@ -219,37 +239,58 @@ program cross
       pw_avefq_en     = 0.d0 
       pw_avefq_en_ref = 0.d0
 
+      
       do o = 1, obs_num
          
-         do k = 1, en_num 
+         do k = 1, en_num - 1
             do jj = 1, freq_num
                do j = lower_fq_obs(jj, o), upper_fq_obs(jj, o)
                   do i = 1, int_number_obs(o)
-                     rc_avefq_en    (jj, k) = rc_avefq_en    (jj, k) + rc_en_obs(i, j, k, o)
-                     ic_avefq_en    (jj, k) = ic_avefq_en    (jj, k) + ic_en_obs(i, j, k, o)
-                     rc2_avefq_en   (jj, k) = rc2_avefq_en   (jj, k) + rc_en_obs(i, j, k, o) * rc_en_obs(i, j, k, o)
-                     ic2_avefq_en   (jj, k) = ic2_avefq_en   (jj, k) + ic_en_obs(i, j, k, o) * ic_en_obs(i, j, k, o)
-                     rc_ic_avefq_en (jj, k) = rc_ic_avefq_en (jj, k) + rc_en_obs(i, j, k, o) * ic_en_obs(i, j, k, o)
-                     pw_avefq_en    (jj, k) = pw_avefq_en    (jj, k) + pw_en_obs(i, j, k, o)
-                     pw_avefq_en_ref(jj, k) = pw_avefq_en_ref(jj, k) + pw_ref_en_obs(i, j, k, o)
-                     ! write(20,*) 'Observation ', o, ' Energy ', k, ' freq_num ', jj, ' relevant freq ',lower_fq_obs(jj, o), upper_fq_obs(jj, o), ' int_number_obs',  int_number_obs(o)
-                     ! write(20,*) rc_en_obs(i, j, k, o), ic_en_obs(i, j, k, o)
+                     en_ind = (2 * k) - 1
+                     rc_avefq_en    (jj, k) = rc_avefq_en    (jj, k) + rc_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) 
+                     ic_avefq_en    (jj, k) = ic_avefq_en    (jj, k) + ic_en_obs(i, j, en_ind, o) + ic_en_obs(i, j, en_ind + 1, o)
+                     rc2_avefq_en   (jj, k) = rc2_avefq_en   (jj, k) + rc_en_obs(i, j, en_ind, o) * rc_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) * rc_en_obs(i, j, en_ind + 1, o)
+                     ic2_avefq_en   (jj, k) = ic2_avefq_en   (jj, k) + ic_en_obs(i, j, en_ind, o) * ic_en_obs(i, j, en_ind, o) + ic_en_obs(i, j, en_ind + 1, o) * ic_en_obs(i, j, en_ind + 1, o)
+                     rc_ic_avefq_en (jj, k) = rc_ic_avefq_en (jj, k) + rc_en_obs(i, j, en_ind, o) * ic_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) * ic_en_obs(i, j, en_ind + 1, o)
+                     pw_avefq_en    (jj, k) = pw_avefq_en    (jj, k) + pw_en_obs(i, j, en_ind, o) + pw_en_obs(i, j, en_ind + 1, o)
+                     pw_avefq_en_ref(jj, k) = pw_avefq_en_ref(jj, k) + pw_ref_en_obs(i, j, en_ind, o) + pw_ref_en_obs(i, j, en_ind + 1, o)
                   enddo
                enddo
             enddo
          enddo
+         
+!last 3 energy bins averaged together
+!----------------------------------------------------------------------------------------------------
+         k = en_num
+         do jj = 1, freq_num
+            do j = lower_fq_obs(jj, o), upper_fq_obs(jj, o)
+               do i = 1, int_number_obs(o)
+                  en_ind = (2 * k) - 1
+                  rc_avefq_en    (jj, k) = rc_avefq_en    (jj, k) + rc_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) + rc_en_obs(i, j, en_ind + 2, o) 
+                  ic_avefq_en    (jj, k) = ic_avefq_en    (jj, k) + ic_en_obs(i, j, en_ind, o) + ic_en_obs(i, j, en_ind + 1, o) + ic_en_obs(i, j, en_ind + 2, o)
+                  rc2_avefq_en   (jj, k) = rc2_avefq_en   (jj, k) + rc_en_obs(i, j, en_ind, o) * rc_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) * rc_en_obs(i, j, en_ind + 1, o) + rc_en_obs(i, j, en_ind + 2, o) * rc_en_obs(i, j, en_ind + 2, o)
+                  ic2_avefq_en   (jj, k) = ic2_avefq_en   (jj, k) + ic_en_obs(i, j, en_ind, o) * ic_en_obs(i, j, en_ind, o) + ic_en_obs(i, j, en_ind + 1, o) * ic_en_obs(i, j, en_ind + 1, o) + ic_en_obs(i, j, en_ind + 2, o) * ic_en_obs(i, j, en_ind + 2, o)
+                  rc_ic_avefq_en (jj, k) = rc_ic_avefq_en (jj, k) + rc_en_obs(i, j, en_ind, o) * ic_en_obs(i, j, en_ind, o) + rc_en_obs(i, j, en_ind + 1, o) * ic_en_obs(i, j, en_ind + 1, o) + rc_en_obs(i, j, en_ind + 2, o) * ic_en_obs(i, j, en_ind + 2, o)
+                  pw_avefq_en    (jj, k) = pw_avefq_en    (jj, k) + pw_en_obs(i, j, en_ind, o) + pw_en_obs(i, j, en_ind + 1, o) + pw_en_obs(i, j, en_ind + 2, o)
+                  pw_avefq_en_ref(jj, k) = pw_avefq_en_ref(jj, k) + pw_ref_en_obs(i, j, en_ind, o) + pw_ref_en_obs(i, j, en_ind + 1, o) + pw_ref_en_obs(i, j, en_ind + 2, o)
+               enddo
+            enddo
+         enddo
+         
+         
       enddo
-
+   
       if(.not. allocated(num_freq_bins)) allocate(num_freq_bins(freq_num))
       num_freq_bins = 0
       do o = 1, obs_num
          do jj = 1, freq_num
-            num_freq_bins(jj) = num_freq_bins(jj) + ((upper_fq_obs(jj, o) - lower_fq_obs(jj, o) + 1) * int_number_obs(o))
+            num_freq_bins(jj) = num_freq_bins(jj) + ((upper_fq_obs(jj, o) - lower_fq_obs(jj, o) + 1) * int_number_obs(o) * 2)
          enddo
       enddo
+!----------------------------------------------------------------------------------------------------
+
+      
 !-----------------------------------------------------------------------------------------------------
-
-
 
 
    if (allocated(rc_en_obs))        deallocate(rc_en_obs)
@@ -259,7 +300,7 @@ program cross
 
 
    
-      do k = 1, en_num 
+      do k = 1, en_num - 1
          do jj = 1, freq_num
             ! write(10,*) 'Energy ', k, ' frequency range ', jj
             rc_avefq_en    (jj, k) = rc_avefq_en    (jj, k) / dble(num_freq_bins(jj))
@@ -274,7 +315,22 @@ program cross
             ! write(10,*) pw_avefq_en(jj, k), pw_avefq_en_ref(jj, k)
          enddo
       enddo
-   
+
+      k = en_num
+! this is for the last energy bin that averages 3 energy bins and NOT 2 
+!----------------------------------------------------------------------------------------------------
+      do jj = 1, freq_num
+         ! write(10,*) 'Energy ', k, ' frequency range ', jj
+         rc_avefq_en    (jj, k) = rc_avefq_en    (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         ic_avefq_en    (jj, k) = ic_avefq_en    (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         rc2_avefq_en   (jj, k) = rc2_avefq_en   (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         ic2_avefq_en   (jj, k) = ic2_avefq_en   (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         rc_ic_avefq_en (jj, k) = rc_ic_avefq_en (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         pw_avefq_en    (jj, k) = pw_avefq_en    (jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+         pw_avefq_en_ref(jj, k) = pw_avefq_en_ref(jj, k) / dble(num_freq_bins(jj) / 2 * 3)
+      enddo
+!----------------------------------------------------------------------------------------------------
+      
 
 !!! Error calculation !!!
    
@@ -293,7 +349,7 @@ program cross
    if(.not. allocated(err_cohe_lag   )) allocate(err_cohe_lag   (freq_num, en_num))
    
    !Error std of real and im part, propagation for the lag, Adam's formula for rc and ic and lag  
-   do k = 1, en_num 
+   do k = 1, en_num - 1
       do jj = 1, freq_num 
 
 !propagation error 
@@ -343,7 +399,62 @@ program cross
       enddo
    enddo
 
+! this is for the last energy bin that averages 3 energy    
+!----------------------------------------------------------------------------------------------------
+   k = en_num 
+   
+   do jj = 1, freq_num 
 
+      !propagation error 
+      var_rc(jj, k) = rc2_avefq_en(jj, k) - rc_avefq_en(jj, k)**2
+      var_ic(jj, k) = ic2_avefq_en(jj, k) - ic_avefq_en(jj, k)**2
+
+      covariance(jj, k) = rc_ic_avefq_en(jj, k) - (rc_avefq_en(jj, k) * ic_avefq_en(jj, k))
+
+      deriv_rc(jj, k) =  (-1.d0 *  ic_avefq_en(jj, k) / rc_avefq_en(jj, k)**2) / (1.d0 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
+      deriv_ic(jj, k) =                        (1.d0  / rc_avefq_en(jj, k))    / (1.d0 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
+
+      !bias term
+      ! if ((num_freq_bins(jj) * int_number_obs(o)) .gt. 500 ) then 
+      !    bias2 = ((pw_avefq_en(jj, k) - P_noise_ext(k)) * P_noise_ext_ref(k) + (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) * P_noise_ext(k) + P_noise_ext(k) * P_noise_ext_ref(k) ) / (real(num_freq_bins(jj) / 2 * 3 * int_number_obs(o)))
+      ! else
+      !    bias2 = 0.d0 
+      ! endif
+
+      bias2 = 0.d0 
+
+      !Adam's formula real and imaginary part
+      err_Aform_rc_ic(jj, k) = sqrt (pw_avefq_en_ref(jj, k) * (pw_avefq_en(jj, k) - ( (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) ) ) / (2.d0 * real(num_freq_bins(jj) / 2 * 3) ) )
+
+      ! Standat error on the real and imaginary part 
+      err_std_rc(jj, k) = sqrt(var_rc(jj, k) / dble(num_freq_bins(jj) / 2 * 3))
+      err_std_ic(jj, k) = sqrt(var_ic(jj, k) / dble(num_freq_bins(jj) / 2 * 3))
+
+      !lag calculation 
+      lag_en(jj, k) = atan2(ic_avefq_en(jj, k), rc_avefq_en(jj, k)) / (2.d0 * pi * relevant_freq(jj))
+
+      !error lag with propagation formula
+      err_prop_lag(jj, k) = sqrt( (deriv_rc(jj, k)**2 * var_rc(jj, k) + deriv_ic(jj, k)**2 * var_ic(jj, k) + 2.d0 * deriv_rc(jj, k) * deriv_ic(jj, k) * covariance(jj, k)) / dble(num_freq_bins(jj) / 2 * 3) ) / (2.d0 * pi * relevant_freq(jj))
+
+      !coherence calculations      
+      coher2_en(jj, k) = (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en(jj, k) * pw_avefq_en_ref(jj, k))
+
+      !Coherence error lag 
+      err_cohe_lag(jj, k) = sqrt( (1.0 - coher2_en(jj, k)) / (2.0 * coher2_en(jj, k) * dble(num_freq_bins(jj)  / 2 * 3 ) ) ) / (2 * pi * relevant_freq(jj)) 
+
+      !Adam's formula lag
+      err_Aform_lag(jj, k) = sqrt( pw_avefq_en_ref(jj, k) * ( (pw_avefq_en(jj, k) / (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) ) - ( 1.d0 / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k))  ) ) / (2 *  dble(num_freq_bins(jj) / 2 * 3)) ) / (2.d0 * pi * relevant_freq(jj)) 
+
+
+      write(*,*) 'Energy num, Freq range num,  relevant freq,  num_freq_average,   coherence,    cross^2,     bias^2 ' 
+      write(*,'(I12, I12, E15.4, I12, E15.4, E15.5, E15.5)') k, jj,  relevant_freq(jj), num_freq_bins(jj), sqrt(coher2_en(jj, k)), rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2, bias2 
+
+   enddo
+!----------------------------------------------------------------------------------------------------
+
+
+
+   
    call print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
         err_std_ic, err_Aform_rc_ic, lag_en, err_Aform_lag, &
         err_cohe_lag, err_prop_lag)

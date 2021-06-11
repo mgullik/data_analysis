@@ -1,3 +1,5 @@
+!this subroutine loads lc from different observations and keep them separated, so the arrays have one dimention more than usual
+
 subroutine load_lc_lag_ene_obs2()
   use dyn_lc
   implicit none

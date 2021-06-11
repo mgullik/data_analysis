@@ -1,3 +1,5 @@
+!This subroutine loads lc from different observations and put them together in the same lc which is the total one
+
 subroutine load_lc_lag_ene_obs()
   use dyn_lc
   implicit none
