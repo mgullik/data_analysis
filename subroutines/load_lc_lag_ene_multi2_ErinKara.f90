@@ -5,20 +5,14 @@ subroutine load_lc_lag_ene_obs2_ek()
   implicit none
 
   integer              :: i, j, k
-  double precision     :: en_units
-  character (len = 500)  :: name_path,  name_base, filename, &
-       filename_en_bin, name_extension, filename_ref, prefix_name
-   logical              :: yes_no
+  character (len = 500)  :: filename, name_path
 
-  integer              :: file_line_num
   integer, allocatable :: l_bin(:), r_bin(:)
 
   integer                       :: gti_dim_obs, o
   double precision, allocatable :: ave_rate_en_obs(:,:)
   double precision, allocatable :: time_obs(:,:,:)
-  double precision              :: start_GTI_obs(max_GTI_dim), end_GTI_obs(max_GTI_dim)
 
-  check_merge = .true.
   
   gti_dim_obs = 1
   

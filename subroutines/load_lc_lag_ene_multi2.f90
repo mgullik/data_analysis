@@ -18,17 +18,16 @@ subroutine load_lc_lag_ene_obs2()
   double precision, allocatable :: time_obs(:,:,:)
   double precision              :: start_GTI_obs(max_GTI_dim), end_GTI_obs(max_GTI_dim)
 
-  check_merge = .true.
-  obs_num = 1
   
   gti_dim_obs = 1
   
       print *, ' '
-      print *, '   Write the name of the channel/energy bin'
-      read(*,'(A)') filename_en_bin
-      write(*,*) trim(filename_en_bin)
-      print *, ' '
-      ! filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
+      ! print *, '   Write the name of the channel/energy bin'
+      ! read(*,'(A)') filename_en_bin
+      ! write(*,*) trim(filename_en_bin)
+      ! print *, ' '
+!Aternatively, comment the 4 lines above and use this one below         
+      filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
       
       if (yes_no('   Are the energies expressed in eV? ')) then
          en_units = 1000.d0
@@ -74,16 +73,15 @@ subroutine load_lc_lag_ene_obs2()
 
       do o = 1, obs_num
          print *, ' '
-         print *, '   Write the name of the path (end with "/"):'
-         read(*,'(A)') name_path
-         write(*,*) 'Path read ', trim(name_path)
+         ! print *, '   Write the name of the path (end with "/"):'
+         ! read(*,'(A)') name_path
+         ! write(*,*) 'Path read ', trim(name_path)
 !Aternatively, comment the 3 lines above and use this one below         
-         ! write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en/'
-         ! write(*,*) 'Path is: (enter to continue)'
-         ! write(*,*) trim(name_path)
-         ! read(*,*)
+         write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en_nofilter/'
+         write(*,*) 'Path is: (enter to continue)'
+         write(*,*) trim(name_path)
+         read(*,*)
 
-         ! write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130801/lc_lag_en/'
          
          ! write(*,*) '   Write the prefix of the light curve filename:'
          ! read(*,'(A)') prefix_name
@@ -97,7 +95,7 @@ subroutine load_lc_lag_ene_obs2()
          ! read(*,'(A)') name_extension
          ! write(*,*)  trim(name_extension)
 !Aternatively, comment the 3 lines above and use this one below       
-         name_extension = '_lag_en2-10.lc'
+         name_extension = '_lag_en_nofilter.lc'
          
          ! en_num = 1
          do k = 1, en_num
@@ -157,7 +155,7 @@ subroutine load_lc_lag_ene_obs2()
          write(*,*) '   Number of intervals in light curves '  , int_number_obs(o)
          write(*,*) '   Number of bins per interval         '  , int_len_dim_obs(o) 
          write(*,*) 
-         
+         ! starting_telescope_time = 0.d0
          do i = 1, int_number_obs(o)
             do j = 1, int_len_dim_obs(o)
                time_obs(i, j, o) = time_int(i, j) + starting_telescope_time
@@ -171,6 +169,8 @@ subroutine load_lc_lag_ene_obs2()
             gti_dim_obs = gti_dim_obs + 1 
          enddo
 
+         ! write(*,*) ' ********************* STARTING TIME *************************', starting_telescope_time
+         
 !deallocation of the usuful array for the next observations 
          if(allocated(split_ind)) deallocate(split_ind)
          if(allocated(time_int) ) deallocate(time_int)
@@ -187,8 +187,8 @@ subroutine load_lc_lag_ene_obs2()
          
       enddo
 
-      
-      
+      call print_lc_multi2(time_obs)
+
 !reference band
 
       if (yes_no('   Do you want to use your reference band for the cross-spectrum?  If no, the code is going to calculate the reference summing all the single energy band light curves, apart from the subject band.')) then      
@@ -225,7 +225,8 @@ subroutine load_lc_lag_ene_obs2()
 
       else
          print *, ' '
-      endif
+      endif      
+
 
       
     end subroutine load_lc_lag_ene_obs2

@@ -36,6 +36,20 @@ program cross
     
 !GET LIGHT CURVEs 
 
+  write(*,*) '   Before starting decide is you want verbose analysis (T) or automatic analysis (F) '
+  read(*,*) verbose_merge
+  print *, ' '
+
+  if (.not. verbose_merge) then
+     write(*,*) '   Set the maximum length that you want to interpolate (in sec).'
+     read(*,*) max_gap_sec_init 
+  endif
+  print *, ' '
+
+  write(*,*) '   How many observations?'
+  read(*,*)   obs_num
+  print *, ' '
+  
   call load_lc_lag_ene_obs2()
 
 !Arrays to save the fourier trasform analysis for every energy       

@@ -80,10 +80,10 @@
 
 
 ! extract the telescope starting time from fits
-      keyword = 'TSTART'
-      starting_telescope_time = get_keyword_double(unit,keyword,status)
+      ! keyword = 'TSTART'
+      ! starting_telescope_time = get_keyword_double(unit,keyword,status)
 !      write(*,*) 'dt', dt
-
+      starting_telescope_time = 0.d0
 
       
 !**************************************************************!      
@@ -234,7 +234,8 @@
       if (allocated(time_e)) then
          if(.not. allocated(time)  ) allocate(time(dim_lc))
          ! if(.not. allocated(time_tel)) allocate(time_tel(dim_lc))
-         first_time_bin = dble(time_e(1)) 
+         first_time_bin = dble(time_e(1))
+         starting_telescope_time = first_time_bin
          do i = 1, dim_lc
             time(i) = dble(time_e(i)) - first_time_bin
             ! time_tel(i) = dble(time_e(i))
@@ -244,6 +245,7 @@
          if(.not. allocated(time)  ) allocate(time(dim_lc))
          ! if(.not. allocated(time_tel)) allocate(time_tel(nrow))
          first_time_bin = time_d(1)
+         starting_telescope_time = first_time_bin
          do i = 1, nrow
             time(i) = time_d(i) - first_time_bin
             ! time_tel(i) = time_d(i)
@@ -396,46 +398,88 @@
  !**************************************************************!
 
 
-!CONVERSION FROM REAL TO DOUBLE PRECISION         
-         if (allocated(start_GTI_e)) then
-            if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
-            ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
-            first_time_bin_GTI = dble(start_GTI_e(1)) 
-            do i = 1, nrow_GTI
-               start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
-               ! start_GTI_tel_time(i) =  dble(start_GTI_e(i))  
-            enddo
+         !CONVERSION FROM REAL TO DOUBLE PRECISION
+         if (first_time_bin .lt. 1.d0) then ! this means that the starting time of the light curve is 0.0 then we need to set the GTI starting from zero 
             
-            deallocate(start_GTI_e)
-         else
-            ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
-            first_time_bin_GTI = start_GTI_d(1) 
-            do i = 1, nrow_GTI
-               start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
-               ! start_GTI_tel_time(i) =  start_GTI_d(i)  
-            enddo
+            if (allocated(start_GTI_e)) then
+               if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+               ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
+               first_time_bin_GTI = dble(start_GTI_e(1)) 
+               do i = 1, nrow_GTI
+                  start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin_GTI
+                  ! start_GTI_tel_time(i) =  dble(start_GTI_e(i))  
+               enddo
+
+               deallocate(start_GTI_e)
+            else
+               ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
+               first_time_bin_GTI = start_GTI_d(1) 
+               do i = 1, nrow_GTI
+                  start_GTI_d(i) = start_GTI_d(i) - first_time_bin_GTI
+                  ! start_GTI_tel_time(i) =  start_GTI_d(i)  
+               enddo
+
+            endif
+
+            if (allocated(end_GTI_e)) then
+               if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+               ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
+               do i = 1, nrow_GTI
+                  end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
+                  ! end_GTI_tel_time(i) = dble(end_GTI_e(i))
+               enddo
+               deallocate(end_GTI_e)
+            else
+               ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
+               do i = 1, nrow_GTI
+                  end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
+                  ! end_GTI_tel_time(i) = end_GTI_d(i) 
+               enddo
+            endif
+
+            
+! The starting time is the telescope time so we need to subtract the GTI from the starting starting time of the light curve
+         else 
+
+            if (allocated(start_GTI_e)) then
+               if(.not. allocated(start_GTI_d)) allocate(start_GTI_d(nrow_GTI))
+               ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
+               do i = 1, nrow_GTI
+                  start_GTI_d(i) = dble(start_GTI_e(i)) - first_time_bin
+                  ! start_GTI_tel_time(i) =  dble(start_GTI_e(i))  
+               enddo
+
+               deallocate(start_GTI_e)
+            else
+               ! if(.not. allocated(start_GTI_tel_tim)) allocate(start_GTI_tel_time(nrow_GTI))
+               first_time_bin_GTI = start_GTI_d(1) 
+               do i = 1, nrow_GTI
+                  start_GTI_d(i) = start_GTI_d(i) - first_time_bin
+                  ! start_GTI_tel_time(i) =  start_GTI_d(i)  
+               enddo
+
+            endif
+
+            if (allocated(end_GTI_e)) then
+               if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
+               ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
+               do i = 1, nrow_GTI
+                  end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin
+                  ! end_GTI_tel_time(i) = dble(end_GTI_e(i))
+               enddo
+               deallocate(end_GTI_e)
+            else
+               ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
+               do i = 1, nrow_GTI
+                  end_GTI_d(i) = end_GTI_d(i)  - first_time_bin
+                  ! end_GTI_tel_time(i) = end_GTI_d(i) 
+               enddo
+            endif
 
          endif
-
-         if (allocated(end_GTI_e)) then
-            if(.not. allocated(end_GTI_d)) allocate(end_GTI_d(nrow_GTI))
-            ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
-            do i = 1, nrow_GTI
-               end_GTI_d(i) = dble(end_GTI_e(i)) - first_time_bin_GTI
-               ! end_GTI_tel_time(i) = dble(end_GTI_e(i))
-            enddo
-            deallocate(end_GTI_e)
-         else
-            ! if(.not. allocated(end_GTI_tel_time)) allocate(end_GTI_tel_time(nrow_GTI))
-            do i = 1, nrow_GTI
-               end_GTI_d(i) = end_GTI_d(i)  - first_time_bin_GTI
-               ! end_GTI_tel_time(i) = end_GTI_d(i) 
-            enddo
-         endif
-   
       endif
 
-
+      
 !HERE it is possible to print the GTI and the gaps
       ! write(*,*) '-----------------------------------------'
       ! write(*,*) 'GTI: ', nrow_GTI

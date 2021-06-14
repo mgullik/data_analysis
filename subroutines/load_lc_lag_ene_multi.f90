@@ -19,7 +19,6 @@ subroutine load_lc_lag_ene_obs()
   double precision, allocatable :: time_obs(:,:,:), lc_int_tot(:,:)
   double precision              :: start_GTI_obs(max_GTI_dim), end_GTI_obs(max_GTI_dim)
 
-  check_merge = .false.
   obs_num = 8
   
   gti_dim_obs = 1
@@ -244,7 +243,6 @@ subroutine load_lc_lag_ene_obs()
       allocate(lc(tot_lc_length))
       if (allocated(split_ind)) deallocate(split_ind)
 
-      check_merge = .true.
       
       do k = 1, en_num
          oo = 0

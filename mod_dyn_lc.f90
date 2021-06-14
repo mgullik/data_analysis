@@ -9,7 +9,7 @@ MODULE dyn_lc
   integer     :: dim_lc, dim_GTI, int_number = -1
   integer     :: int_len_dim, gap = -1, check_gap_num = -1, en_num, obs_num
   double precision     :: dt = -1.d0
-  logical              :: check_power2, check_merge, verbose_merge
+  logical              :: check_power2, verbose_merge
 
   integer         , parameter   :: max_GTI_dim = 1000, int_number_max = 100, int_len_dim_max = 100000
 
