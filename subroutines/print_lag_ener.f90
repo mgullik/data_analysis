@@ -14,7 +14,7 @@ subroutine print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
                          err_cohe_lag(freq_num, en_num), &
                          err_prop_lag(freq_num, en_num)
   integer             :: jj, k
-  character (len=200) :: filename
+  character (len=200) :: filename, name_base, name_base_2
   
    filename = 'ener_rc.dat'
    open(84, file = filename)
@@ -163,37 +163,37 @@ subroutine print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
   write(*,*)"----------------------------------------------------------------"
 
 
-! !XSPEC stuff  (use flx2xsp to create the pha file)
-!    do jj = 1, freq_num 
-!       write(name_base  , '(A,I1,A)') 'rc',jj - 1,'.dat'  
-!       write(name_base_2, '(A,I1,A)') 'ic',jj - 1,'.dat'  
-!       open(11, file = trim(name_base))
-!       open(12, file = trim(name_base_2))
-!       write(11, *) '0.1 0.3 0.01 0.01 '
-!       write(12, *) '0.1 0.3 0.01 0.01 '
-!       do k = 1, en_num 
-!          write(11, *)  l_bin(k), r_bin(k),  (r_bin(k) - l_bin(k)) * rc_fq_en(jj, k), (r_bin(k) - l_bin(k)) * error_Aform_rc_ic(jj, k)
-!          write(12, *)  l_bin(k), r_bin(k),  (r_bin(k) - l_bin(k)) * ic_fq_en(jj, k), (r_bin(k) - l_bin(k)) * error_Aform_rc_ic(jj, k)
-!       enddo
-!       write(11, *) '10.0 20. 0.01 0.01 '
-!       write(12, *) '10.0 20. 0.01 0.01'
-!       close(11)
-!       close(12)
-!    enddo
-!    write(*,*) 'Use flx2xsp to create the pha files from rc and ic'
+!XSPEC stuff  (use flx2xsp to create the pha file)
+   do jj = 1, freq_num 
+      write(name_base  , '(A,I1,A)') 'products/rc',jj - 1,'.dat'  
+      write(name_base_2, '(A,I1,A)') 'products/ic',jj - 1,'.dat'  
+      open(11, file = trim(name_base))
+      open(12, file = trim(name_base_2))
+      write(11, *) '0.1 0.3 0.01 0.01 '
+      write(12, *) '0.1 0.3 0.01 0.01 '
+      do k = 1, en_num 
+         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * rc_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_Aform_rc_ic(jj, k)
+         write(12, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * ic_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_Aform_rc_ic(jj, k)
+      enddo
+      write(11, *) '10.0 20. 0.01 0.01 '
+      write(12, *) '10.0 20. 0.01 0.01'
+      close(11)
+      close(12)
+   enddo
+   write(*,*) 'Use flx2xsp to create the pha files from rc and ic'
 
-! ! !XSPEC lags 
-!    do jj = 1, freq_num 
-!       write(name_base  , '(A,I1,A)') 'lag',jj - 1,'.dat'  
-!       open(11, file = trim(name_base))
-!       write(11, *) '0.1 0.3 0.01 0.01 '
-!       do k = 1, en_num 
-!          write(11, *)  l_bin(k), r_bin(k),  (r_bin(k) - l_bin(k)) * lag_freq(jj, k), (r_bin(k) - l_bin(k)) *  error_Aform_lag(jj, k)
-!       enddo
-!       write(11, *) '10.0 20. 0.01 0.01 '
-!       close(11)
-!    enddo
-!    write(*,*) 'Use flx2xsp to create the pha files from the lag file'
+! !XSPEC lags 
+   do jj = 1, freq_num 
+      write(name_base  , '(A,I1,A)') 'products/lag',jj - 1,'.dat'  
+      open(11, file = trim(name_base))
+      write(11, *) '0.1 0.3 0.01 0.01 '
+      do k = 1, en_num 
+         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * lag_en(jj, k), (r_en_bin(k) - l_en_bin(k)) *  err_Aform_lag(jj, k)
+      enddo
+      write(11, *) '10.0 20. 0.01 0.01 '
+      close(11)
+   enddo
+   write(*,*) 'Use flx2xsp to create the pha files from the lag file'
 
 
 
