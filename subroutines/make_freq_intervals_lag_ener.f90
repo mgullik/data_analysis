@@ -7,7 +7,7 @@ subroutine make_freq_intervals()
   double precision , allocatable :: fq_min_arr(:), fq_max_arr(:), fq(:)
   character (len=200)  :: filename 
 
-  filename = 'ener_freq_info.txt'
+  filename = 'products/ener_freq_info.txt'
 
   open(12, file = filename)
    

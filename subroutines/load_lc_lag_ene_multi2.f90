@@ -77,7 +77,7 @@ subroutine load_lc_lag_ene_obs2()
          ! read(*,'(A)') name_path
          ! write(*,*) 'Path read ', trim(name_path)
 !Aternatively, comment the 3 lines above and use this one below         
-         write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en_nofilter/'
+         write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en_pileup_nofil/'
          write(*,*) 'Path is: (enter to continue)'
          write(*,*) trim(name_path)
          read(*,*)
@@ -95,7 +95,7 @@ subroutine load_lc_lag_ene_obs2()
          ! read(*,'(A)') name_extension
          ! write(*,*)  trim(name_extension)
 !Aternatively, comment the 3 lines above and use this one below       
-         name_extension = '_lag_en_nofilter.lc'
+         name_extension = '_lag_en_pileup_nofil.lc'
          
          ! en_num = 1
          do k = 1, en_num

@@ -16,25 +16,25 @@ subroutine print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
   integer             :: jj, k
   character (len=200) :: filename, name_base, name_base_2
   
-   filename = 'ener_rc.dat'
+   filename = 'products/ener_rc.dat'
    open(84, file = filename)
-   filename = 'ener_rc_err_Aform.dat'
+   filename = 'products/ener_rc_err_Aform.dat'
    open(840, file = filename)
-   filename = 'ener_rc_err_std.dat'
+   filename = 'products/ener_rc_err_std.dat'
    open(841, file = filename)
-   filename = 'ener_ic.dat'
+   filename = 'products/ener_ic.dat'
    open(85, file = filename)
-   filename = 'ener_ic_err_Aform.dat'
+   filename = 'products/ener_ic_err_Aform.dat'
    open(850, file = filename)
-   filename = 'ener_ic_err_std.dat'
+   filename = 'products/ener_ic_err_std.dat'
    open(851, file = filename)
-   filename = 'lag_ener.dat'
+   filename = 'products/lag_ener.dat'
    open(86, file = filename)
-   filename = 'lag_ener_err_Aform.dat'
+   filename = 'products/lag_ener_err_Aform.dat'
    open(860, file = filename)
-   filename = 'lag_ener_err_cohe.dat'
+   filename = 'products/lag_ener_err_cohe.dat'
    open(861, file = filename)
-   filename = 'lag_ener_err_prop.dat'
+   filename = 'products/lag_ener_err_prop.dat'
    open(862, file = filename)
   
 !printing different stuff
