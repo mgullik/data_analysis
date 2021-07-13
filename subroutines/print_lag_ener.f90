@@ -169,11 +169,11 @@ subroutine print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
       write(name_base_2, '(A,I1,A)') 'products/ic',jj - 1,'.dat'  
       open(11, file = trim(name_base))
       open(12, file = trim(name_base_2))
-      write(11, *) '0.1 0.3 0.01 0.01 '
+       write(11, *) '0.1 0.3 0.01 0.01 '
       write(12, *) '0.1 0.3 0.01 0.01 '
       do k = 1, en_num 
-         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * rc_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_Aform_rc_ic(jj, k)
-         write(12, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * ic_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_Aform_rc_ic(jj, k)
+         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * rc_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_std_rc(jj, k)
+         write(12, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * ic_avefq_en(jj, k), (r_en_bin(k) - l_en_bin(k)) * err_std_ic(jj, k)
       enddo
       write(11, *) '10.0 20. 0.01 0.01 '
       write(12, *) '10.0 20. 0.01 0.01'
@@ -188,7 +188,7 @@ subroutine print_lag_ener(rc_avefq_en, ic_avefq_en, err_std_rc, &
       open(11, file = trim(name_base))
       write(11, *) '0.1 0.3 0.01 0.01 '
       do k = 1, en_num 
-         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * lag_en(jj, k), (r_en_bin(k) - l_en_bin(k)) *  err_Aform_lag(jj, k)
+         write(11, *)  l_en_bin(k), r_en_bin(k),  (r_en_bin(k) - l_en_bin(k)) * lag_en(jj, k), (r_en_bin(k) - l_en_bin(k)) *  err_cohe_lag(jj, k)
       enddo
       write(11, *) '10.0 20. 0.01 0.01 '
       close(11)

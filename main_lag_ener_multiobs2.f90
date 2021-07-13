@@ -320,13 +320,13 @@ program cross
       deriv_ic(jj, k) =                        (1.d0  / rc_avefq_en(jj, k))    / (1.d0 + (ic_avefq_en(jj, k) / rc_avefq_en(jj, k))**2 )
 
 !bias term
-      ! if ((num_freq_bins(jj) * int_number_obs(o)) .gt. 500 ) then 
-      !    bias2 = ((pw_avefq_en(jj, k) - P_noise_ext(k)) * P_noise_ext_ref(k) + (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) * P_noise_ext(k) + P_noise_ext(k) * P_noise_ext_ref(k) ) / (real(num_freq_bins(jj) * int_number_obs(o)))
-      ! else
-      !    bias2 = 0.d0 
-      ! endif
+      if ((num_freq_bins(jj) * int_number_obs(o)) .gt. 500 ) then 
+         bias2 = ((pw_avefq_en(jj, k) - P_noise_ext(k)) * P_noise_ext_ref(k) + (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) * P_noise_ext(k) + P_noise_ext(k) * P_noise_ext_ref(k) ) / (real(num_freq_bins(jj) * int_number_obs(o)))
+      else
+         bias2 = 0.d0 
+      endif
 
-      bias2 = 0.d0 
+      ! bias2 = 0.d0 
 
 !Adam's formula real and imaginary part
       err_Aform_rc_ic(jj, k) = sqrt (pw_avefq_en_ref(jj, k) * (pw_avefq_en(jj, k) - ( (rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2 - bias2) / (pw_avefq_en_ref(jj, k) - P_noise_ext_ref(k)) ) ) / (2.d0 * real(num_freq_bins(jj)) ) )
@@ -352,7 +352,7 @@ program cross
 
 
          write(*,*) 'Energy num, Freq range num,  relevant freq,  num_freq_average,   coherence,    cross^2,     bias^2 ' 
-         write(*,'(I12, I12, E15.4, I12, E15.4, E15.5, E15.5)') k, jj,  relevant_freq(jj), num_freq_bins(jj), sqrt(coher2_en(jj, k)), rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2, bias2 
+         write(*,'(I12, I12, E15.4, I15, E20.4, E16.5, E16.5)') k, jj,  relevant_freq(jj), num_freq_bins(jj), sqrt(coher2_en(jj, k)), rc_avefq_en(jj, k)**2 + ic_avefq_en(jj, k)**2, bias2 
 
       enddo
    enddo

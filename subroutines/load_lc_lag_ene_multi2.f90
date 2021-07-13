@@ -22,12 +22,12 @@ subroutine load_lc_lag_ene_obs2()
   gti_dim_obs = 1
   
       print *, ' '
-      ! print *, '   Write the name of the channel/energy bin'
-      ! read(*,'(A)') filename_en_bin
-      ! write(*,*) trim(filename_en_bin)
-      ! print *, ' '
+      print *, '   Write the name of file for the channel/energy bin, this must be common for all the observations (with the full path)'
+      read(*,'(A)') filename_en_bin
+      write(*,*) trim(filename_en_bin)
+      print *, ' '
 !Aternatively, comment the 4 lines above and use this one below         
-      filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
+      ! filename_en_bin = '/Users/gullo/Work/AGN_project/ark564/binning_en.txt'
       
       if (yes_no('   Are the energies expressed in eV? ')) then
          en_units = 1000.d0
@@ -70,32 +70,39 @@ subroutine load_lc_lag_ene_obs2()
       if (.not. allocated(lc_en_obs)  ) allocate(lc_en_obs   (int_number_max, int_len_dim_max, en_num, obs_num))
       
 !GET ALL THE LIGHT CURVES IN ALL THE OBSERVATIONS
-
+      print *, ""
+      print *, "-------------------------------------------------------------"
+      print *, "   !!! LET'S START WITH THE SINGLE/MULTI OBSERVATIONS !!!"
+      
       do o = 1, obs_num
          print *, ' '
-         ! print *, '   Write the name of the path (end with "/"):'
-         ! read(*,'(A)') name_path
-         ! write(*,*) 'Path read ', trim(name_path)
+         print *, '   Write the name of the path (end with "/"):'
+         read(*,'(A)') name_path
+         write(*,*) 'Path read ', trim(name_path)
 !Aternatively, comment the 3 lines above and use this one below         
-         write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en_pileup_nofil/'
-         write(*,*) 'Path is: (enter to continue)'
-         write(*,*) trim(name_path)
-         read(*,*)
+         ! write(name_path, '(A,I1,A)') '/Users/gullo/Work/AGN_project/ark564/0670130', o + 1, '01/lc_lag_en_pileup_nofil/'
+         ! write(*,*) 'Path is: (enter to continue)'
+         ! write(*,*) trim(name_path)
+         ! read(*,*)
 
-         
-         ! write(*,*) '   Write the prefix of the light curve filename:'
-         ! read(*,'(A)') prefix_name
-         ! write(*,*)  trim(prefix_name)
+          
+         print *, ' '
+         write(*,*) '   Write the folder and the prefix of the light curves:'
+         write(*,*) '   !! ATTENTION !!: (the folder is the one containing the all the lc, if there is one, the prefix is everything  up to "en")'
+         read(*,'(A)') prefix_name
+         write(*,*)  trim(prefix_name)
 !Aternatively, comment the 3 lines above and use this one below       
-         prefix_name = 'PN_lccorr_en'
+         ! prefix_name = 'PN_lccorr_en'
 
          write(name_base, '(A, A)')  trim(name_path), trim(prefix_name)
 
-         ! write(*,*) '   Write the extension of the light curve filename:'
-         ! read(*,'(A)') name_extension
-         ! write(*,*)  trim(name_extension)
+         print *, ' '
+         write(*,*) '   Write the suffix of the light curve filename:'
+         write(*,*) '   (the suffix is everything after the energy numbers)'
+         read(*,'(A)') name_extension
+         write(*,*)  trim(name_extension)
 !Aternatively, comment the 3 lines above and use this one below       
-         name_extension = '_lag_en_pileup_nofil.lc'
+         ! name_extension = '_lag_en_pileup_nofil.lc'
          
          ! en_num = 1
          do k = 1, en_num

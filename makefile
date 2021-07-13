@@ -57,4 +57,4 @@ clean:
 	rm -f *.o *~ subroutines/*~ ener ek_ener freq lc2pds lc2pds_nu
 
 clean_products:
-	rm -f lag_freq* lag_ener* freq_cross_* ener_* fort.*
+	rm -f lag_freq* lag_ener* freq_cross_* ener_* fort.* products/* products/printed_lcs/*
